@@ -148,3 +148,6 @@ readme.md
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 .vite/
+test.ts
+.env.example
+src/config

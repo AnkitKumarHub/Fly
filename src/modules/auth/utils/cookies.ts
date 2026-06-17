@@ -12,7 +12,8 @@ function baseCookieOptions(maxAgeMs: number): CookieOptions {
   return {
     httpOnly: true,
     secure: env.cookieSecure,
-    sameSite: "none",
+    sameSite: env.cookieSameSite,
+    domain: env.cookieDomain,
     path: "/",
     maxAge: maxAgeMs,
   };
@@ -21,8 +22,9 @@ function baseCookieOptions(maxAgeMs: number): CookieOptions {
 function clearCookieOptions(): CookieOptions {
   return {
     path: "/",
-    sameSite: "none",
     secure: env.cookieSecure,
+    sameSite: env.cookieSameSite,
+    domain: env.cookieDomain,
   };
 }
 

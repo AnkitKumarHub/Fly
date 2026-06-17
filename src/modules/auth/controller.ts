@@ -2,13 +2,15 @@ import type { Request, Response } from "express";
 
 import { ApiError, sendErrorResponse } from "../../common/utils/api-error.js";
 import { ApiResponse } from "../../common/utils/api-response.js";
+import { env } from "../../config/env.js";
 import {
   clearAuthCookies,
   getRefreshTokenFromRequest,
   setAuthCookies,
 } from "./utils/cookies.js";
+import { getGoogleAuthUrl, getGoogleProfileFromCode } from "./google.js";
 import { signInPayloadSchema, signupPayloadSchema } from "./schema.js";
-import { getAuthenticatedUser, signIn, signUp } from "./service.js";
+import { getAuthenticatedUser, googleSignIn, signIn, signUp } from "./service.js";
 import {
   refreshAuthSession,
   revokeAuthSession,
@@ -39,6 +41,12 @@ export async function handleSignUp(req: Request, res: Response) {
 
   try {
     const { userId } = await signUp(validationResult.data);
+    const { accessToken, refreshToken } = await signIn({
+      email: validationResult.data.email,
+      password: validationResult.data.password,
+    });
+
+    setAuthCookies(res, accessToken, refreshToken);
 
     return ApiResponse.created(res, "User created successfully", { id: userId });
   } catch (error) {
@@ -66,20 +74,60 @@ export async function handleSignIn(req: Request, res: Response) {
   }
 }
 
+export function handleGoogleRedirect(_req: Request, res: Response) {
+  return res.redirect(getGoogleAuthUrl());
+}
+
+export async function handleGoogleCallback(req: Request, res: Response) {
+  const code = typeof req.query.code === "string" ? req.query.code : undefined;
+
+  if (!code) {
+    return res.redirect(`${env.frontendUrl}/signup?error=google_auth_failed`);
+  }
+
+  try {
+    const profile = await getGoogleProfileFromCode(code);
+    const { accessToken, refreshToken } = await googleSignIn(profile);
+
+    setAuthCookies(res, accessToken, refreshToken);
+
+    return res.redirect(`${env.frontendUrl}/dashboard`);
+  } catch (error) {
+    console.error("Google auth failed:", error);
+    return res.redirect(`${env.frontendUrl}/signup?error=google_auth_failed`);
+  }
+}
+
 export async function handleRefresh(req: Request, res: Response) {
   const refreshToken = getRefreshTokenFromRequest(req);
 
   if (!refreshToken) {
     clearAuthCookies(res);
-    return sendErrorResponse(res, ApiError.unauthorized("Refresh token required"));
+    return sendErrorResponse(
+      res,
+      ApiError.unauthorized("Refresh token required", "refresh_token_required", true),
+    );
   }
 
   try {
     const session = await refreshAuthSession(refreshToken);
+    console.info("auth.refresh.success", {
+      ip: req.ip,
+      path: req.originalUrl,
+    });
     setAuthCookies(res, session.accessToken, session.refreshToken);
 
     return ApiResponse.ok(res, "Session refreshed");
   } catch (error) {
+    if (error instanceof ApiError) {
+      console.warn("auth.refresh.failed", {
+        code: error.code ?? "unknown_error",
+        ip: req.ip,
+        path: req.originalUrl,
+        statusCode: error.statusCode,
+      });
+    }
+
     return handleError(res, error);
   }
 }
@@ -93,8 +141,10 @@ export async function handleSignOut(req: Request, res: Response) {
 
 export async function handleMe(req: Request, res: Response) {
   if (!req.user) {
-    clearAuthCookies(res);
-    return sendErrorResponse(res, ApiError.unauthorized("Authentication required"));
+    return sendErrorResponse(
+      res,
+      ApiError.unauthorized("Authentication required", "authentication_required"),
+    );
   }
 
   try {

@@ -8,6 +8,7 @@ export const usersTable = pgTable("users", {
 
   email: varchar("email", { length: 322 }).notNull().unique(),
   emailVerified: boolean("email_verified").default(false).notNull(),
+  googleId: varchar("google_id", { length: 255 }).unique(),
 
   password: text("password"),
 

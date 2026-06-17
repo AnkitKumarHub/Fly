@@ -1,5 +1,6 @@
 import { eq } from "drizzle-orm";
-
+import { setupCorsair } from "corsair";
+import { corsair } from "../../corsair.js";
 import { ApiError } from "../../common/utils/api-error.js";
 import { db } from "../../db/index.js";
 import { usersTable } from "../../db/auth-schema.js";
@@ -35,6 +36,8 @@ export async function signUp(input: SignUpInput): Promise<{ userId: string }> {
       throw new Error("User creation failed.");
     }
 
+    await setupCorsair(corsair, { tenantId: createdUser.id });
+
     return { userId: createdUser.id };
   } catch (error) {
     if (isUniqueViolation(error)) {
@@ -62,6 +65,73 @@ export async function signIn(input: SignInInput) {
   }
 
   return issueAuthSession(user.id);
+}
+
+export interface GoogleSignInInput {
+  googleId: string;
+  email: string;
+  firstName: string;
+  lastName: string | null;
+}
+
+export async function googleSignIn(input: GoogleSignInInput) {
+  const [userByGoogleId] = await db
+    .select()
+    .from(usersTable)
+    .where(eq(usersTable.googleId, input.googleId));
+
+  if (userByGoogleId) {
+    return issueAuthSession(userByGoogleId.id);
+  }
+
+  const [userByEmail] = await db
+    .select()
+    .from(usersTable)
+    .where(eq(usersTable.email, input.email));
+
+  if (userByEmail) {
+    const [linkedUser] = await db
+      .update(usersTable)
+      .set({
+        googleId: input.googleId,
+        emailVerified: true,
+      })
+      .where(eq(usersTable.id, userByEmail.id))
+      .returning({ id: usersTable.id });
+
+    if (!linkedUser) {
+      throw new Error("Failed to link Google account.");
+    }
+
+    return issueAuthSession(linkedUser.id);
+  }
+
+  try {
+    const [createdUser] = await db
+      .insert(usersTable)
+      .values({
+        firstName: input.firstName,
+        lastName: input.lastName,
+        email: input.email,
+        googleId: input.googleId,
+        emailVerified: true,
+      })
+      .returning({ id: usersTable.id });
+
+    if (!createdUser) {
+      throw new Error("User creation failed.");
+    }
+
+    await setupCorsair(corsair, { tenantId: createdUser.id });
+
+    return issueAuthSession(createdUser.id);
+  } catch (error) {
+    if (isUniqueViolation(error)) {
+      throw ApiError.conflict("A user with this email already exists.", "duplicate_email");
+    }
+
+    throw error;
+  }
 }
 
 export async function getAuthenticatedUser(userId: string): Promise<AuthenticatedUser> {

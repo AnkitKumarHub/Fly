@@ -39,6 +39,10 @@ export class ApiError extends Error {
     return new ApiError(403, message, code ? { code } : undefined);
   }
 
+  public static tooManyRequests(message = "Too many requests", code?: string): ApiError {
+    return new ApiError(429, message, code ? { code } : undefined);
+  }
+
   public static notFound(message = "Not found", code?: string): ApiError {
     return new ApiError(404, message, code ? { code } : undefined);
   }

@@ -1,5 +1,6 @@
 import type { NextFunction, Request, Response } from "express";
 
+import { ApiError, sendErrorResponse } from "../common/utils/api-error.js";
 import { getAccessTokenFromRequest } from "../modules/auth/utils/cookies.js";
 import { verifyAccessToken } from "../modules/auth/utils/token.js";
 
@@ -26,7 +27,10 @@ export function authenticationMiddleware() {
 export function restrictToAuthenticatedUser() {
   return (req: Request, res: Response, next: NextFunction): void => {
     if (!req.user) {
-      res.status(401).json({ message: "Authentication required" });
+      sendErrorResponse(
+        res,
+        ApiError.unauthorized("Authentication required", "authentication_required"),
+      );
       return;
     }
     next();
