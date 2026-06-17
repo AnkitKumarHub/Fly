@@ -1,4 +1,4 @@
-import { boolean, pgTable, text, timestamp, uuid, varchar } from "drizzle-orm/pg-core";
+import { boolean, pgTable, text, timestamp, uniqueIndex, uuid, varchar } from "drizzle-orm/pg-core";
 
 export const usersTable = pgTable("users", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -27,3 +27,24 @@ export const refreshTokensTable = pgTable("refresh_tokens", {
   expiresAt: timestamp("expires_at").notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
+
+export const integrationConnectionsTable = pgTable(
+  "integration_connections",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => usersTable.id, { onDelete: "cascade" }),
+    plugin: varchar("plugin", { length: 32 }).notNull(),
+    status: varchar("status", { length: 16 }).notNull().default("active"),
+    disconnectedAt: timestamp("disconnected_at"),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at")
+      .defaultNow()
+      .$onUpdate(() => new Date())
+      .notNull(),
+  },
+  (table) => [
+    uniqueIndex("integration_connections_user_plugin_unique").on(table.userId, table.plugin),
+  ],
+);

@@ -1,4 +1,5 @@
 import { ApiError } from "../../common/utils/api-error.js";
+import { handleIntegrationApiError } from "../integrations/oauth-errors.js";
 import { corsair } from "../../corsair.js";
 import { buildRawEmail } from "./mime.js";
 import { parseGmailMessage, type ParsedEmail } from "./parse.js";
@@ -6,6 +7,14 @@ import type { ComposeEmailInput } from "./schema.js";
 
 function gmailFor(tenantId: string) {
   return corsair.withTenant(tenantId).gmail;
+}
+
+async function withGmailApi<T>(tenantId: string, fn: () => Promise<T>): Promise<T> {
+  try {
+    return await fn();
+  } catch (error) {
+    return handleIntegrationApiError(error, tenantId, "gmail");
+  }
 }
 
 type DbMessageRow = Record<string, unknown> & {
@@ -37,9 +46,17 @@ function isListRowSparse(row: DbMessageRow): boolean {
   return !from && !subject;
 }
 
+function labelIdsFromMessage(message: Record<string, unknown>, parsed: ParsedEmail) {
+  if (Array.isArray(message.labelIds)) {
+    return message.labelIds.filter((id): id is string => typeof id === "string");
+  }
+  return parsed.labelIds ?? [];
+}
+
 function normalizeListRow(row: DbMessageRow) {
   const message = (row.data ?? row) as Record<string, unknown>;
   const parsed = parseGmailMessage(message as Parameters<typeof parseGmailMessage>[0]);
+  const labelIds = labelIdsFromMessage(message, parsed);
 
   return {
     id: resolveGmailMessageId(row),
@@ -51,6 +68,8 @@ function normalizeListRow(row: DbMessageRow) {
     to: (message.to as string | undefined) || parsed.to || undefined,
     internalDate:
       message.internalDate != null ? String(message.internalDate) : undefined,
+    labelIds,
+    isUnread: labelIds.includes("UNREAD"),
   };
 }
 
@@ -61,7 +80,9 @@ async function enrichSparseListRow(tenantId: string, row: DbMessageRow) {
   }
 
   const gmailId = resolveGmailMessageId(row);
-  const message = await gmailFor(tenantId).api.messages.get({ id: gmailId, format: "full" });
+  const message = (await withGmailApi(tenantId, () =>
+    gmailFor(tenantId).api.messages.get({ id: gmailId, format: "full" }),
+  )) as Parameters<typeof parseGmailMessage>[0];
   const parsed = parseGmailMessage(message);
 
   return {
@@ -69,6 +90,8 @@ async function enrichSparseListRow(tenantId: string, row: DbMessageRow) {
     subject: parsed.subject || undefined,
     from: parsed.from || undefined,
     to: parsed.to || undefined,
+    labelIds: parsed.labelIds ?? baseline.labelIds,
+    isUnread: (parsed.labelIds ?? baseline.labelIds)?.includes("UNREAD") ?? false,
   };
 }
 
@@ -93,18 +116,22 @@ async function resolveGmailMessageIdForFetch(tenantId: string, id: string): Prom
 /** Pulls the latest inbox messages from the Gmail API into Corsair's synced DB cache. */
 export async function syncInbox(tenantId: string, maxResults = 25) {
   const gmail = gmailFor(tenantId);
-  const listResult = await gmail.api.messages.list({ maxResults, labelIds: ["INBOX"] });
+  const listResult = await withGmailApi(tenantId, () =>
+    gmail.api.messages.list({ maxResults, labelIds: ["INBOX"] }),
+  );
   const messages = (listResult as { messages?: { id?: string }[] })?.messages ?? [];
 
-  await Promise.all(
-    messages
-      .filter((message): message is { id: string } => typeof message.id === "string")
-      .map((message) =>
-        gmail.api.messages.get({
-          id: message.id,
-          format: "metadata",
-        }),
-      ),
+  await withGmailApi(tenantId, () =>
+    Promise.all(
+      messages
+        .filter((message): message is { id: string } => typeof message.id === "string")
+        .map((message) =>
+          gmail.api.messages.get({
+            id: message.id,
+            format: "metadata",
+          }),
+        ),
+    ),
   );
 
   return listResult;
@@ -133,16 +160,22 @@ export async function searchEmails(
 
 export async function getEmail(tenantId: string, id: string): Promise<ParsedEmail> {
   const gmailId = await resolveGmailMessageIdForFetch(tenantId, id);
-  const message = await gmailFor(tenantId).api.messages.get({ id: gmailId, format: "full" });
+  const message = (await withGmailApi(tenantId, () =>
+    gmailFor(tenantId).api.messages.get({ id: gmailId, format: "full" }),
+  )) as Parameters<typeof parseGmailMessage>[0];
   return parseGmailMessage(message);
 }
 
 export async function sendEmail(tenantId: string, input: ComposeEmailInput) {
-  return gmailFor(tenantId).api.messages.send({ raw: buildRawEmail(input) });
+  return withGmailApi(tenantId, () =>
+    gmailFor(tenantId).api.messages.send({ raw: buildRawEmail(input) }),
+  );
 }
 
 export async function createDraft(tenantId: string, input: ComposeEmailInput) {
-  return gmailFor(tenantId).api.drafts.create({
-    draft: { message: { raw: buildRawEmail(input) } },
-  });
+  return withGmailApi(tenantId, () =>
+    gmailFor(tenantId).api.drafts.create({
+      draft: { message: { raw: buildRawEmail(input) } },
+    }),
+  );
 }

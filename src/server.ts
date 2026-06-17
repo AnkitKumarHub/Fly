@@ -7,6 +7,7 @@ import { authRouter } from "./modules/auth/route.js";
 import { emailsRouter } from "./modules/emails/route.js";
 import { eventsRouter } from "./modules/events/route.js";
 import { integrationsRouter } from "./modules/integrations/route.js";
+import { notificationsRouter } from "./notifications/route.js";
 import { authenticationMiddleware } from "./middleware/auth-middleware.js";
 import { webhooksRouter } from "./webhooks/route.js";
 
@@ -34,6 +35,7 @@ export function createApplication(): Express {
   app.use("/integrations", integrationsRouter);
   app.use("/emails", emailsRouter);
   app.use("/events", eventsRouter);
+  app.use("/notifications", notificationsRouter);
   app.use("/webhooks", webhooksRouter);
 
   return app;

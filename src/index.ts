@@ -1,10 +1,13 @@
 import "dotenv/config";
 import { createServer } from "node:http";
 
+import { startPgListener } from "./notifications/pg-bus.js";
 import { createApplication } from "./server.js";
 
 async function main() {
   try {
+    await startPgListener();
+
     const server = createServer(createApplication());
     const PORT = Number(process.env.PORT) || 8000;
 

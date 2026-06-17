@@ -4,13 +4,17 @@ import { generateOAuthUrl, processOAuthCallback } from "corsair/oauth";
 import { corsair } from "../../corsair.js";
 import { env } from "../../config/env.js";
 import { restrictToAuthenticatedUser } from "../../middleware/auth-middleware.js";
-import { handleGetStatus } from "./controller.js";
+import { handleDisconnect, handleGetStatus } from "./controller.js";
+import { markIntegrationActive } from "./connection-state.js";
+import { renewWatchIfNeeded } from "./watches.js";
 
 export const integrationsRouter: Router = express.Router();
 
 const REDIRECT_URI = `${env.appUrl}/integrations/callback`;
 
 integrationsRouter.get("/status", restrictToAuthenticatedUser(), handleGetStatus);
+
+integrationsRouter.post("/disconnect", restrictToAuthenticatedUser(), handleDisconnect);
 
 /**
  * GET /integrations/connect?plugin=gmail
@@ -67,7 +71,12 @@ integrationsRouter.get("/callback", async (req, res) => {
   try {
     const result = await processOAuthCallback(corsair, { code, state, redirectUri: REDIRECT_URI });
     res.clearCookie("oauth_state");
-    return res.redirect(`${env.frontendUrl}/dashboard/integrations?connected=${result.plugin}`);
+
+    const plugin = result.plugin as "gmail" | "googlecalendar";
+    await markIntegrationActive(result.tenantId, plugin);
+    void renewWatchIfNeeded(result.tenantId, plugin);
+
+    return res.redirect(`${env.frontendUrl}/dashboard/integrations?connected=${plugin}`);
   } catch (error) {
     res.clearCookie("oauth_state");
     return res.status(500).json({ success: false, message: "OAuth callback failed" });

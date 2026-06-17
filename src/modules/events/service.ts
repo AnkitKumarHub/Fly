@@ -1,4 +1,5 @@
 import { ApiError } from "../../common/utils/api-error.js";
+import { handleIntegrationApiError } from "../integrations/oauth-errors.js";
 import { corsair } from "../../corsair.js";
 import {
   isCorsairEntityUuid,
@@ -10,6 +11,14 @@ import type { CreateEventInput, SyncEventsQuery, UpdateEventInput } from "./sche
 
 function calendarFor(tenantId: string) {
   return corsair.withTenant(tenantId).googlecalendar;
+}
+
+async function withCalendarApi<T>(tenantId: string, fn: () => Promise<T>): Promise<T> {
+  try {
+    return await fn();
+  } catch (error) {
+    return handleIntegrationApiError(error, tenantId, "googlecalendar");
+  }
 }
 
 function defaultSyncRange(): { timeMin: string; timeMax: string } {
@@ -50,13 +59,15 @@ async function resolveGoogleEventIdForFetch(tenantId: string, id: string): Promi
 export async function syncEvents(tenantId: string, query: SyncEventsQuery = {}) {
   const defaults = defaultSyncRange();
 
-  return calendarFor(tenantId).api.events.getMany({
-    timeMin: query.timeMin ?? defaults.timeMin,
-    timeMax: query.timeMax ?? defaults.timeMax,
-    singleEvents: true,
-    maxResults: 250,
-    orderBy: "startTime",
-  });
+  return withCalendarApi(tenantId, () =>
+    calendarFor(tenantId).api.events.getMany({
+      timeMin: query.timeMin ?? defaults.timeMin,
+      timeMax: query.timeMax ?? defaults.timeMax,
+      singleEvents: true,
+      maxResults: 250,
+      orderBy: "startTime",
+    }),
+  );
 }
 
 /** Reads the event feed from Corsair's synced DB (fast, no rate limits). */
@@ -86,18 +97,22 @@ export async function searchEvents(
 
 export async function getEvent(tenantId: string, id: string): Promise<NormalizedEvent> {
   const googleId = await resolveGoogleEventIdForFetch(tenantId, id);
-  const event = await calendarFor(tenantId).api.events.get({ id: googleId });
+  const event = (await withCalendarApi(tenantId, () =>
+    calendarFor(tenantId).api.events.get({ id: googleId }),
+  )) as Parameters<typeof normalizeEvent>[0];
   return normalizeEvent(event);
 }
 
 export async function createEvent(tenantId: string, input: CreateEventInput) {
   const { event, calendarId, sendUpdates } = input;
 
-  const created = await calendarFor(tenantId).api.events.create({
-    event,
-    ...(calendarId ? { calendarId } : {}),
-    ...(sendUpdates ? { sendUpdates } : {}),
-  });
+  const created = (await withCalendarApi(tenantId, () =>
+    calendarFor(tenantId).api.events.create({
+      event,
+      ...(calendarId ? { calendarId } : {}),
+      ...(sendUpdates ? { sendUpdates } : {}),
+    }),
+  )) as Parameters<typeof normalizeEvent>[0];
 
   return normalizeEvent(created);
 }
@@ -106,17 +121,21 @@ export async function updateEvent(tenantId: string, id: string, input: UpdateEve
   const googleId = await resolveGoogleEventIdForFetch(tenantId, id);
   const { event, calendarId, sendUpdates } = input;
 
-  const updated = await calendarFor(tenantId).api.events.update({
-    id: googleId,
-    event,
-    ...(calendarId ? { calendarId } : {}),
-    ...(sendUpdates ? { sendUpdates } : {}),
-  });
+  const updated = (await withCalendarApi(tenantId, () =>
+    calendarFor(tenantId).api.events.update({
+      id: googleId,
+      event,
+      ...(calendarId ? { calendarId } : {}),
+      ...(sendUpdates ? { sendUpdates } : {}),
+    }),
+  )) as Parameters<typeof normalizeEvent>[0];
 
   return normalizeEvent(updated);
 }
 
 export async function deleteEvent(tenantId: string, id: string) {
   const googleId = await resolveGoogleEventIdForFetch(tenantId, id);
-  await calendarFor(tenantId).api.events.delete({ id: googleId });
+  await withCalendarApi(tenantId, () =>
+    calendarFor(tenantId).api.events.delete({ id: googleId }),
+  );
 }

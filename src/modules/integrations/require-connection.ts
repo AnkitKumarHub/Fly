@@ -2,8 +2,7 @@ import type { NextFunction, Request, Response } from "express";
 
 import { ApiError, sendErrorResponse } from "../../common/utils/api-error.js";
 import { hasActiveConnection } from "./service.js";
-
-type IntegrationPlugin = "gmail" | "googlecalendar";
+import type { IntegrationPlugin } from "./types.js";
 
 export function requireConnection(plugin: IntegrationPlugin) {
   return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
