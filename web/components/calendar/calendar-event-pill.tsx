@@ -57,12 +57,14 @@ export function CalendarEventPill({
       }}
       style={style}
       className={cn(
-        "group/event block w-full truncate rounded-lg border px-2 py-1 text-left shadow-sm transition-shadow",
+        "group/event block w-full truncate rounded-lg border px-2 py-1 text-left",
+        "shadow-[0_1px_1px_rgba(0,0,0,0.03)] transition-[box-shadow,transform] duration-150",
+        "dark:shadow-none",
         color.bg,
         color.text,
         color.border,
         compact ? "text-[11px] leading-tight" : "text-xs",
-        "hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40",
+        "hover:shadow-[0_3px_8px_rgba(0,0,0,0.06)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600/20",
         className,
       )}
       title={`${event.summary || "(no title)"} · ${formatEventTimeLabel(event.start, event.end)}`}

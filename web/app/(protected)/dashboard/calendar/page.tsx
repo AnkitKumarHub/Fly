@@ -150,13 +150,22 @@ export default function CalendarPage() {
 
   if (!isCalendarConnected) {
     return (
-      <div className="flex h-[calc(100vh-var(--header-height))] flex-col items-center justify-center gap-3 px-6 text-center">
-        <HugeiconsIcon icon={Calendar03Icon} strokeWidth={2} className="size-10 text-muted-foreground" />
-        <h1 className="text-xl font-semibold tracking-tight">Connect Google Calendar</h1>
-        <p className="max-w-md text-sm text-muted-foreground">
-          Connect your Google Calendar account to view and manage events.
-        </p>
-        <Button render={<Link href="/dashboard/integrations" />}>Go to Integrations</Button>
+      <div className="flex h-[calc(100vh-var(--header-height))] flex-col items-center justify-center gap-4 px-6 text-center">
+        <div className="flex size-14 items-center justify-center rounded-2xl border border-border/60 bg-card shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
+          <HugeiconsIcon icon={Calendar03Icon} strokeWidth={2} className="size-7 text-muted-foreground" />
+        </div>
+        <div className="space-y-1.5">
+          <h1 className="text-xl font-semibold tracking-tight">Connect Google Calendar</h1>
+          <p className="max-w-md text-sm leading-relaxed text-muted-foreground">
+            Link your calendar on the integrations page to view and manage events here.
+          </p>
+        </div>
+        <Button
+          render={<Link href="/dashboard/integrations" />}
+          className="rounded-full bg-foreground px-5 text-background hover:bg-foreground/90"
+        >
+          Go to integrations
+        </Button>
       </div>
     )
   }
@@ -255,17 +264,21 @@ function CalendarEmptyState({
   onSync: () => void
 }) {
   return (
-    <div className="flex h-full flex-col items-center justify-center gap-3 px-6 text-center">
-      <HugeiconsIcon icon={Calendar03Icon} strokeWidth={2} className="size-10 text-muted-foreground/70" />
-      <p className="text-sm font-medium text-foreground">No events on your calendar</p>
-      <p className="max-w-sm text-xs text-muted-foreground">
-        Sync from Google Calendar or add your first event to get started.
-      </p>
+    <div className="flex h-full flex-col items-center justify-center gap-4 px-6 text-center">
+      <div className="flex size-14 items-center justify-center rounded-2xl border border-border/60 bg-card shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
+        <HugeiconsIcon icon={Calendar03Icon} strokeWidth={2} className="size-7 text-muted-foreground/80" />
+      </div>
+      <div className="space-y-1">
+        <p className="text-sm font-medium text-foreground">No events on your calendar</p>
+        <p className="max-w-sm text-xs leading-relaxed text-muted-foreground">
+          Sync from Google Calendar or add your first event to get started.
+        </p>
+      </div>
       <div className="flex items-center gap-2">
-        <Button variant="outline" size="sm" onClick={onSync} className="rounded-xl">
+        <Button variant="outline" size="sm" onClick={onSync} className="rounded-full">
           Sync calendar
         </Button>
-        <Button size="sm" onClick={onCreate} className="rounded-xl">
+        <Button size="sm" onClick={onCreate} className="rounded-full bg-foreground text-background hover:bg-foreground/90">
           Add event
         </Button>
       </div>
@@ -289,22 +302,22 @@ function CalendarPageSkeleton() {
 function CalendarGridSkeleton({ view }: { view: CalendarView }) {
   if (view === "month") {
     return (
-      <div className="grid min-h-0 flex-1 grid-cols-7 gap-px bg-border/30 p-px">
+      <div className="grid min-h-0 flex-1 auto-rows-fr grid-cols-7 gap-2 overflow-hidden bg-[#F7F7F6] p-3 dark:bg-muted/10 md:gap-2.5 md:p-5">
         {Array.from({ length: 35 }).map((_, index) => (
-          <Skeleton key={index} className="min-h-[5.5rem] rounded-none bg-background" />
+          <Skeleton key={index} className="min-h-[5.5rem] rounded-2xl bg-card md:min-h-[6.75rem]" />
         ))}
       </div>
     )
   }
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col gap-3 p-6">
+    <div className="flex min-h-0 flex-1 flex-col gap-3 bg-[#F7F7F6] p-6 dark:bg-muted/10">
       <div className="grid grid-cols-7 gap-2">
         {Array.from({ length: 7 }).map((_, index) => (
-          <Skeleton key={index} className="h-16 rounded-2xl" />
+          <Skeleton key={index} className="h-16 rounded-2xl bg-card" />
         ))}
       </div>
-      <Skeleton className="min-h-0 flex-1 rounded-2xl" />
+      <Skeleton className="min-h-0 flex-1 rounded-2xl bg-card" />
     </div>
   )
 }
