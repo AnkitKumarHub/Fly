@@ -1,11 +1,108 @@
 "use client";
 
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion, useScroll, useTransform, useMotionValue, useSpring, useMotionTemplate, Variants } from "framer-motion";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { CommandIcon, Mail01Icon, Calendar01Icon, SparklesIcon, CheckmarkCircle01Icon, ZapIcon } from "@hugeicons/core-free-icons";
 import { FaGithub, FaSlack, FaGoogleDrive } from "react-icons/fa";
 import { SiGmail, SiGooglecalendar } from "react-icons/si";
 import Link from "next/link";
+import { useRef, MouseEvent, ReactNode } from "react";
+
+// --- Helper Components for Micro-Interactions ---
+
+function SpotlightCard({ children, className = "" }: { children: ReactNode, className?: string }) {
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
+
+  function handleMouseMove({ currentTarget, clientX, clientY }: MouseEvent) {
+    const { left, top } = currentTarget.getBoundingClientRect();
+    mouseX.set(clientX - left);
+    mouseY.set(clientY - top);
+  }
+
+  return (
+    <div
+      className={`group relative overflow-hidden rounded-2xl border border-white/5 bg-[#141615] shadow-lg transition-colors duration-300 hover:border-[#BDCDD6]/50 hover:shadow-[0_0_20px_rgba(189,205,214,0.15)] ${className}`}
+      onMouseMove={handleMouseMove}
+    >
+      <motion.div
+        className="pointer-events-none absolute -inset-px rounded-2xl opacity-0 transition duration-300 group-hover:opacity-100 z-0"
+        style={{
+          background: useMotionTemplate`
+            radial-gradient(
+              600px circle at ${mouseX}px ${mouseY}px,
+              rgba(189, 205, 214, 0.1),
+              transparent 80%
+            )
+          `,
+        }}
+      />
+      <div className="relative z-10 h-full">{children}</div>
+    </div>
+  );
+}
+
+function MagneticButton({ children, className = "", href }: { children: ReactNode, className?: string, href: string }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const x = useMotionValue(0);
+  const y = useMotionValue(0);
+
+  const springConfig = { damping: 15, stiffness: 150, mass: 0.1 };
+  const springX = useSpring(x, springConfig);
+  const springY = useSpring(y, springConfig);
+
+  const handleMouseMove = (e: MouseEvent) => {
+    if (!ref.current) return;
+    const { clientX, clientY } = e;
+    const { width, height, left, top } = ref.current.getBoundingClientRect();
+    const centerX = left + width / 2;
+    const centerY = top + height / 2;
+    x.set((clientX - centerX) * 0.2);
+    y.set((clientY - centerY) * 0.2);
+  };
+
+  const handleMouseLeave = () => {
+    x.set(0);
+    y.set(0);
+  };
+
+  return (
+    <motion.div
+      ref={ref}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+      style={{ x: springX, y: springY }}
+      className="inline-block"
+      whileHover={{ scale: 1.05 }}
+      whileTap={{ scale: 0.95 }}
+    >
+      <Link href={href} className={className}>
+        {children}
+      </Link>
+    </motion.div>
+  );
+}
+
+const sentenceVariant: Variants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.08,
+    },
+  },
+};
+
+const wordVariant: Variants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.5, ease: "easeOut" }
+  },
+};
+
+// --- Main Page Component ---
 
 export default function LandingPage() {
   // Parallax scroll hooks
@@ -16,12 +113,12 @@ export default function LandingPage() {
   const y4 = useTransform(scrollY, [0, 1000], [0, -90]);
   const y5 = useTransform(scrollY, [0, 1000], [0, -150]);
 
-  const scrollVariant = {
+  const scrollVariant: Variants = {
     hidden: { opacity: 0, y: 30 },
     visible: { opacity: 1, y: 0, transition: { duration: 0.6 } }
   };
 
-  const staggerContainer = {
+  const staggerContainer: Variants = {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
@@ -29,7 +126,7 @@ export default function LandingPage() {
     }
   };
 
-  const staggerItem = {
+  const staggerItem: Variants = {
     hidden: { opacity: 0, y: 20 },
     visible: { opacity: 1, y: 0, transition: { duration: 0.5 } }
   };
@@ -42,6 +139,13 @@ export default function LandingPage() {
         }
         .animate-marquee {
           animation: marquee 30s linear infinite;
+        }
+        @keyframes shiny {
+          0% { background-position: -100% 0; }
+          100% { background-position: 200% 0; }
+        }
+        .animate-shiny {
+          animation: shiny 4s linear infinite;
         }
       `}} />
       
@@ -68,7 +172,7 @@ export default function LandingPage() {
           <div className="flex items-center gap-4">
             <Link href="/dashboard" className="hidden sm:block text-sm font-medium text-[#929E96] hover:text-white transition-colors">Sign in</Link>
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-              <Link href="/dashboard" className="px-4 py-2 text-sm font-medium bg-white text-black rounded-full shadow-[0_0_15px_rgba(255,255,255,0.1)] block">
+              <Link href="/dashboard" className="px-4 py-2 text-sm font-medium bg-white text-black rounded-full shadow-[0_0_15px_rgba(255,255,255,0.1)] block hover:shadow-[0_0_20px_rgba(255,255,255,0.3)] transition-shadow">
                 Start free
               </Link>
             </motion.div>
@@ -106,36 +210,49 @@ export default function LandingPage() {
             </motion.div>
           </div>
 
-          <motion.div 
-            initial="hidden" 
-            animate="visible" 
-            variants={scrollVariant}
-            className="flex-1 space-y-8 relative z-10"
-          >
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#141615] border border-white/10 text-xs font-medium text-[#BDCDD6] shadow-lg">
+          <div className="flex-1 space-y-8 relative z-10">
+            <motion.div initial="hidden" animate="visible" variants={scrollVariant} className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#141615] border border-white/10 text-xs font-medium text-[#BDCDD6] shadow-lg">
               <HugeiconsIcon icon={SparklesIcon} strokeWidth={2} className="size-3" />
               <span>Connect the apps you already use</span>
-            </div>
-            <h1 className="text-5xl lg:text-7xl font-black tracking-tighter leading-[1.05] text-white">
-              Your day, <br className="hidden lg:block"/>arranged before <br className="hidden lg:block"/>it starts shouting.
-            </h1>
-            <p className="text-lg text-[#929E96] max-w-xl leading-relaxed">
+            </motion.div>
+            
+            <motion.h1 
+              variants={sentenceVariant} 
+              initial="hidden" 
+              animate="visible" 
+              className="text-5xl lg:text-7xl font-black tracking-tighter leading-[1.05] text-white"
+            >
+              <motion.span variants={wordVariant} className="inline-block mr-3">Your</motion.span>
+              <motion.span variants={wordVariant} className="inline-block mr-3">day,</motion.span>
+              <br className="hidden lg:block"/>
+              <motion.span variants={wordVariant} className="inline-block mr-3">arranged</motion.span>
+              <motion.span variants={wordVariant} className="inline-block mr-3">before</motion.span>
+              <br className="hidden lg:block"/>
+              <motion.span variants={wordVariant} className="inline-block mr-3">it</motion.span>
+              <motion.span variants={wordVariant} className="inline-block mr-3">starts</motion.span>
+              <motion.span variants={wordVariant} className="inline-block relative">
+                <span className="relative z-10">shouting.</span>
+                {/* Shiny Text overlay */}
+                <span className="absolute inset-0 z-20 bg-clip-text text-transparent bg-[linear-gradient(120deg,transparent_30%,rgba(255,255,255,0.8)_50%,transparent_70%)] bg-[length:200%_auto] animate-shiny pointer-events-none">
+                  shouting.
+                </span>
+              </motion.span>
+            </motion.h1>
+
+            <motion.p initial="hidden" animate="visible" variants={scrollVariant} className="text-lg text-[#929E96] max-w-xl leading-relaxed">
               Tell Fly what needs to happen. It reads the request across your tools, schedules the meeting, prepares the follow-up, and keeps the next action obvious.
-            </p>
-            <div className="flex flex-col sm:flex-row items-center gap-4 pt-4">
-              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="w-full sm:w-auto">
-                <Link href="/dashboard" className="w-full px-6 py-3 text-sm font-semibold bg-white text-black rounded-full text-center flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(255,255,255,0.15)]">
-                  Get started free
-                  <span className="text-black/50">→</span>
-                </Link>
-              </motion.div>
+            </motion.p>
+            <motion.div initial="hidden" animate="visible" variants={scrollVariant} className="flex flex-col sm:flex-row items-center gap-4 pt-4">
+              <MagneticButton href="/dashboard" className="w-full sm:w-auto px-6 py-3 text-sm font-semibold bg-white text-black rounded-full text-center flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(255,255,255,0.15)] hover:shadow-[0_0_30px_rgba(255,255,255,0.4)] transition-shadow">
+                Get started free <span className="text-black/50">→</span>
+              </MagneticButton>
               <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="w-full sm:w-auto">
                 <Link href="#pricing" className="w-full px-6 py-3 text-sm font-medium bg-[#141615] border border-white/10 text-white rounded-full text-center block hover:bg-white/5 transition-colors">
                   View pricing
                 </Link>
               </motion.div>
-            </div>
-          </motion.div>
+            </motion.div>
+          </div>
 
           {/* Layered 3D Dashboard Mockup */}
           <div className="flex-1 w-full relative h-[400px] md:h-[500px] z-10 perspective-1000">
@@ -236,9 +353,17 @@ export default function LandingPage() {
             className="mb-16 max-w-2xl"
           >
             <p className="text-[#BDCDD6] text-xs font-bold uppercase tracking-widest mb-4">What We Do</p>
-            <h2 className="text-4xl md:text-5xl font-black tracking-tighter text-white leading-tight mb-6">
-              The smart calendar assistant that keeps your day simple.
-            </h2>
+            <motion.h2 
+              variants={sentenceVariant} 
+              initial="hidden" 
+              whileInView="visible" 
+              viewport={{ once: true }} 
+              className="text-4xl md:text-5xl font-black tracking-tighter text-white leading-tight mb-6"
+            >
+              {"The smart calendar assistant that keeps your day simple.".split(" ").map((word, i) => (
+                <motion.span key={i} variants={wordVariant} className="inline-block mr-2">{word}</motion.span>
+              ))}
+            </motion.h2>
             <p className="text-lg text-[#929E96]">
               Every feature is written in plain words so you always know what your schedule is doing. Fly is built for the recurring mess: a client emails a date, someone changes the time, the calendar needs priority.
             </p>
@@ -251,48 +376,56 @@ export default function LandingPage() {
             variants={staggerContainer}
             className="grid grid-cols-1 md:grid-cols-2 gap-4"
           >
-            <motion.div variants={staggerItem} whileHover={{ y: -5 }} className="bg-[#141615] border border-white/5 p-8 rounded-2xl hover:border-[#BDCDD6]/50 transition-colors duration-300 group shadow-lg hover:shadow-[0_0_20px_rgba(189,205,214,0.15)] relative overflow-hidden">
-              <div className="absolute top-8 right-8 text-6xl font-black text-white/5 group-hover:text-white/10 transition-colors">01</div>
-              <div className="bg-[#0A0B0A] p-3 rounded-xl border border-white/10 text-[#BDCDD6] w-max mb-8 group-hover:scale-110 transition-transform">
-                <HugeiconsIcon icon={ZapIcon} strokeWidth={2} className="size-5" />
-              </div>
-              <h3 className="text-xl font-bold text-white mb-3">Plain-language scheduling</h3>
-              <p className="text-[#929E96] text-sm leading-relaxed relative z-10">
-                Ask for a meeting the way you would text a teammate. Fly finds the intent, date, guest, and priority instantly.
-              </p>
+            <motion.div variants={staggerItem} className="h-full">
+              <SpotlightCard className="p-8 h-full">
+                <div className="absolute top-8 right-8 text-6xl font-black text-white/5 group-hover:text-white/10 transition-colors">01</div>
+                <div className="bg-[#0A0B0A] p-3 rounded-xl border border-white/10 text-[#BDCDD6] w-max mb-8 group-hover:scale-110 transition-transform">
+                  <HugeiconsIcon icon={ZapIcon} strokeWidth={2} className="size-5" />
+                </div>
+                <h3 className="text-xl font-bold text-white mb-3">Plain-language scheduling</h3>
+                <p className="text-[#929E96] text-sm leading-relaxed relative z-10">
+                  Ask for a meeting the way you would text a teammate. Fly finds the intent, date, guest, and priority instantly.
+                </p>
+              </SpotlightCard>
             </motion.div>
 
-            <motion.div variants={staggerItem} whileHover={{ y: -5 }} className="bg-[#141615] border border-white/5 p-8 rounded-2xl hover:border-[#BDCDD6]/50 transition-colors duration-300 group shadow-lg hover:shadow-[0_0_20px_rgba(189,205,214,0.15)] relative overflow-hidden">
-              <div className="absolute top-8 right-8 text-6xl font-black text-white/5 group-hover:text-white/10 transition-colors">02</div>
-              <div className="bg-[#0A0B0A] p-3 rounded-xl border border-white/10 text-[#BDCDD6] w-max mb-8 group-hover:scale-110 transition-transform">
-                <HugeiconsIcon icon={Calendar01Icon} strokeWidth={2} className="size-5" />
-              </div>
-              <h3 className="text-xl font-bold text-white mb-3">Gmail plus Calendar context</h3>
-              <p className="text-[#929E96] text-sm leading-relaxed relative z-10">
-                See the email thread beside the calendar move it caused, so decisions stay traceable without tab hopping.
-              </p>
+            <motion.div variants={staggerItem} className="h-full">
+              <SpotlightCard className="p-8 h-full">
+                <div className="absolute top-8 right-8 text-6xl font-black text-white/5 group-hover:text-white/10 transition-colors">02</div>
+                <div className="bg-[#0A0B0A] p-3 rounded-xl border border-white/10 text-[#BDCDD6] w-max mb-8 group-hover:scale-110 transition-transform">
+                  <HugeiconsIcon icon={Calendar01Icon} strokeWidth={2} className="size-5" />
+                </div>
+                <h3 className="text-xl font-bold text-white mb-3">Gmail plus Calendar context</h3>
+                <p className="text-[#929E96] text-sm leading-relaxed relative z-10">
+                  See the email thread beside the calendar move it caused, so decisions stay traceable without tab hopping.
+                </p>
+              </SpotlightCard>
             </motion.div>
 
-            <motion.div variants={staggerItem} whileHover={{ y: -5 }} className="bg-[#141615] border border-white/5 p-8 rounded-2xl hover:border-[#BDCDD6]/50 transition-colors duration-300 group shadow-lg hover:shadow-[0_0_20px_rgba(189,205,214,0.15)] relative overflow-hidden">
-              <div className="absolute top-8 right-8 text-6xl font-black text-white/5 group-hover:text-white/10 transition-colors">03</div>
-              <div className="bg-[#0A0B0A] p-3 rounded-xl border border-white/10 text-[#BDCDD6] w-max mb-8 group-hover:scale-110 transition-transform">
-                <HugeiconsIcon icon={Mail01Icon} strokeWidth={2} className="size-5" />
-              </div>
-              <h3 className="text-xl font-bold text-white mb-3">Follow-ups with review</h3>
-              <p className="text-[#929E96] text-sm leading-relaxed relative z-10">
-                Draft confirmations, reminders, and next-step emails with clear review points before anything important goes out.
-              </p>
+            <motion.div variants={staggerItem} className="h-full">
+              <SpotlightCard className="p-8 h-full">
+                <div className="absolute top-8 right-8 text-6xl font-black text-white/5 group-hover:text-white/10 transition-colors">03</div>
+                <div className="bg-[#0A0B0A] p-3 rounded-xl border border-white/10 text-[#BDCDD6] w-max mb-8 group-hover:scale-110 transition-transform">
+                  <HugeiconsIcon icon={Mail01Icon} strokeWidth={2} className="size-5" />
+                </div>
+                <h3 className="text-xl font-bold text-white mb-3">Follow-ups with review</h3>
+                <p className="text-[#929E96] text-sm leading-relaxed relative z-10">
+                  Draft confirmations, reminders, and next-step emails with clear review points before anything important goes out.
+                </p>
+              </SpotlightCard>
             </motion.div>
 
-            <motion.div variants={staggerItem} whileHover={{ y: -5 }} className="bg-[#141615] border border-white/5 p-8 rounded-2xl hover:border-[#BDCDD6]/50 transition-colors duration-300 group shadow-lg hover:shadow-[0_0_20px_rgba(189,205,214,0.15)] relative overflow-hidden">
-              <div className="absolute top-8 right-8 text-6xl font-black text-white/5 group-hover:text-white/10 transition-colors">04</div>
-              <div className="bg-[#0A0B0A] p-3 rounded-xl border border-white/10 text-[#BDCDD6] w-max mb-8 group-hover:scale-110 transition-transform">
-                <HugeiconsIcon icon={SparklesIcon} strokeWidth={2} className="size-5" />
-              </div>
-              <h3 className="text-xl font-bold text-white mb-3">Priority focus mode</h3>
-              <p className="text-[#929E96] text-sm leading-relaxed relative z-10">
-                Mark what matters, quiet the noise, and keep the next useful action visible across your day seamlessly.
-              </p>
+            <motion.div variants={staggerItem} className="h-full">
+              <SpotlightCard className="p-8 h-full">
+                <div className="absolute top-8 right-8 text-6xl font-black text-white/5 group-hover:text-white/10 transition-colors">04</div>
+                <div className="bg-[#0A0B0A] p-3 rounded-xl border border-white/10 text-[#BDCDD6] w-max mb-8 group-hover:scale-110 transition-transform">
+                  <HugeiconsIcon icon={SparklesIcon} strokeWidth={2} className="size-5" />
+                </div>
+                <h3 className="text-xl font-bold text-white mb-3">Priority focus mode</h3>
+                <p className="text-[#929E96] text-sm leading-relaxed relative z-10">
+                  Mark what matters, quiet the noise, and keep the next useful action visible across your day seamlessly.
+                </p>
+              </SpotlightCard>
             </motion.div>
           </motion.div>
         </section>
@@ -306,9 +439,17 @@ export default function LandingPage() {
           className="px-6 max-w-6xl mx-auto py-24 border-t border-white/5"
         >
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-black tracking-tighter text-white leading-tight mb-4">
-              How Fly checks everything before action.
-            </h2>
+            <motion.h2 
+              variants={sentenceVariant} 
+              initial="hidden" 
+              whileInView="visible" 
+              viewport={{ once: true }} 
+              className="text-3xl md:text-4xl font-black tracking-tighter text-white leading-tight mb-4"
+            >
+              {"How Fly checks everything before action.".split(" ").map((word, i) => (
+                <motion.span key={i} variants={wordVariant} className="inline-block mr-2">{word}</motion.span>
+              ))}
+            </motion.h2>
             <p className="text-lg text-[#929E96] max-w-2xl mx-auto">
               A transparent, zero-trust pipeline. Fly does the heavy lifting, but you retain absolute control.
             </p>
@@ -392,9 +533,17 @@ export default function LandingPage() {
             className="mb-16 text-center"
           >
             <p className="text-[#BDCDD6] text-xs font-bold uppercase tracking-widest mb-4">Integrations</p>
-            <h2 className="text-4xl font-black tracking-tighter text-white leading-tight mb-6">
-              Connects with tools you already use.
-            </h2>
+            <motion.h2 
+              variants={sentenceVariant} 
+              initial="hidden" 
+              whileInView="visible" 
+              viewport={{ once: true }} 
+              className="text-4xl font-black tracking-tighter text-white leading-tight mb-6"
+            >
+              {"Connects with tools you already use.".split(" ").map((word, i) => (
+                <motion.span key={i} variants={wordVariant} className="inline-block mr-2">{word}</motion.span>
+              ))}
+            </motion.h2>
           </motion.div>
 
           <motion.div 
@@ -405,7 +554,7 @@ export default function LandingPage() {
             className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"
           >
             {/* GitHub */}
-            <motion.div variants={staggerItem} whileHover={{ y: -5 }} className="bg-[#141615] border border-white/5 p-6 rounded-2xl hover:border-white/20 transition-colors shadow-lg group">
+            <motion.div variants={staggerItem} className="bg-[#141615] border border-white/5 p-6 rounded-2xl transition-all duration-300 hover:border-white/20 shadow-lg group hover:shadow-[0_0_40px_rgba(255,255,255,0.15)] hover:-translate-y-2 cursor-pointer">
               <div className="bg-white p-3 rounded-2xl w-max mb-4 shadow-[0_0_15px_rgba(255,255,255,0.2)] group-hover:shadow-[0_0_25px_rgba(255,255,255,0.4)] transition-shadow">
                 <FaGithub className="size-8 text-[#0A0B0A]" />
               </div>
@@ -414,7 +563,7 @@ export default function LandingPage() {
             </motion.div>
 
             {/* Gmail */}
-            <motion.div variants={staggerItem} whileHover={{ y: -5 }} className="bg-[#141615] border border-white/5 p-6 rounded-2xl hover:border-white/20 transition-colors shadow-lg group">
+            <motion.div variants={staggerItem} className="bg-[#141615] border border-white/5 p-6 rounded-2xl transition-all duration-300 hover:border-[#ea4335]/30 shadow-lg group hover:shadow-[0_0_40px_rgba(234,67,53,0.15)] hover:-translate-y-2 cursor-pointer">
               <div className="bg-white p-3 rounded-2xl w-max mb-4 shadow-[0_0_15px_rgba(234,67,53,0.2)] group-hover:shadow-[0_0_25px_rgba(234,67,53,0.4)] transition-shadow">
                 <SiGmail className="size-8 text-[#ea4335]" />
               </div>
@@ -423,7 +572,7 @@ export default function LandingPage() {
             </motion.div>
 
             {/* Slack */}
-            <motion.div variants={staggerItem} whileHover={{ y: -5 }} className="bg-[#141615] border border-white/5 p-6 rounded-2xl hover:border-white/20 transition-colors shadow-lg group">
+            <motion.div variants={staggerItem} className="bg-[#141615] border border-white/5 p-6 rounded-2xl transition-all duration-300 hover:border-[#E01E5A]/30 shadow-lg group hover:shadow-[0_0_40px_rgba(224,30,90,0.15)] hover:-translate-y-2 cursor-pointer">
               <div className="bg-white p-3 rounded-2xl w-max mb-4 shadow-[0_0_15px_rgba(224,30,90,0.2)] group-hover:shadow-[0_0_25px_rgba(224,30,90,0.4)] transition-shadow">
                 <FaSlack className="size-8 text-[#E01E5A]" />
               </div>
@@ -432,7 +581,7 @@ export default function LandingPage() {
             </motion.div>
 
             {/* Drive */}
-            <motion.div variants={staggerItem} whileHover={{ y: -5 }} className="bg-[#141615] border border-white/5 p-6 rounded-2xl hover:border-white/20 transition-colors shadow-lg group">
+            <motion.div variants={staggerItem} className="bg-[#141615] border border-white/5 p-6 rounded-2xl transition-all duration-300 hover:border-[#FFBA00]/30 shadow-lg group hover:shadow-[0_0_40px_rgba(255,186,0,0.15)] hover:-translate-y-2 cursor-pointer">
               <div className="bg-white p-3 rounded-2xl w-max mb-4 shadow-[0_0_15px_rgba(255,186,0,0.2)] group-hover:shadow-[0_0_25px_rgba(255,186,0,0.4)] transition-shadow">
                 <FaGoogleDrive className="size-8 text-[#FFBA00]" />
               </div>
@@ -508,9 +657,17 @@ export default function LandingPage() {
           >
             <div className="text-center mb-16">
               <p className="text-[#BDCDD6] text-xs font-bold uppercase tracking-widest mb-4">Pricing</p>
-              <h2 className="text-4xl md:text-5xl font-black tracking-tighter text-white mb-6">
-                Choose the plan that fits your day.
-              </h2>
+              <motion.h2 
+                variants={sentenceVariant} 
+                initial="hidden" 
+                whileInView="visible" 
+                viewport={{ once: true }} 
+                className="text-4xl md:text-5xl font-black tracking-tighter text-white mb-6"
+              >
+                {"Choose the plan that fits your day.".split(" ").map((word, i) => (
+                  <motion.span key={i} variants={wordVariant} className="inline-block mr-2">{word}</motion.span>
+                ))}
+              </motion.h2>
               <p className="text-lg text-[#929E96]">Start free and upgrade when you want deeper automation.</p>
             </div>
 
@@ -522,72 +679,66 @@ export default function LandingPage() {
               className="grid grid-cols-1 md:grid-cols-3 gap-6 items-center"
             >
               {/* Free */}
-              <motion.div 
-                variants={staggerItem}
-                whileHover={{ scale: 1.02 }} 
-                className="bg-[#141615] border border-white/5 rounded-3xl p-8 hover:border-white/20 transition-colors duration-300 shadow-lg"
-              >
-                <h3 className="text-xl font-bold text-white mb-2">Free</h3>
-                <p className="text-sm text-[#929E96] mb-8">For trying the calmer way to plan a day.</p>
-                <div className="flex items-baseline gap-2 mb-8">
-                  <span className="text-5xl font-black text-white">$0</span>
-                  <span className="text-sm font-medium text-[#929E96]">/ month</span>
-                </div>
-                <ul className="space-y-4 mb-8">
-                  <li className="flex items-center gap-3 text-sm text-[#929E96]"><HugeiconsIcon icon={CheckmarkCircle01Icon} className="size-4 text-white/20"/> Calendar + Gmail summary</li>
-                  <li className="flex items-center gap-3 text-sm text-[#929E96]"><HugeiconsIcon icon={CheckmarkCircle01Icon} className="size-4 text-white/20"/> 5 AI requests per week</li>
-                  <li className="flex items-center gap-3 text-sm text-[#929E96]"><HugeiconsIcon icon={CheckmarkCircle01Icon} className="size-4 text-white/20"/> Manual review before send</li>
-                </ul>
-                <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="w-full py-3 rounded-full bg-[#0A0B0A] border border-white/10 text-white font-medium hover:bg-white/5 transition-colors">
-                  Choose Free
-                </motion.button>
+              <motion.div variants={staggerItem} className="h-full">
+                <SpotlightCard className="p-8 h-full">
+                  <h3 className="text-xl font-bold text-white mb-2">Free</h3>
+                  <p className="text-sm text-[#929E96] mb-8">For trying the calmer way to plan a day.</p>
+                  <div className="flex items-baseline gap-2 mb-8">
+                    <span className="text-5xl font-black text-white">$0</span>
+                    <span className="text-sm font-medium text-[#929E96]">/ month</span>
+                  </div>
+                  <ul className="space-y-4 mb-8">
+                    <li className="flex items-center gap-3 text-sm text-[#929E96]"><HugeiconsIcon icon={CheckmarkCircle01Icon} className="size-4 text-white/20"/> Calendar + Gmail summary</li>
+                    <li className="flex items-center gap-3 text-sm text-[#929E96]"><HugeiconsIcon icon={CheckmarkCircle01Icon} className="size-4 text-white/20"/> 5 AI requests per week</li>
+                    <li className="flex items-center gap-3 text-sm text-[#929E96]"><HugeiconsIcon icon={CheckmarkCircle01Icon} className="size-4 text-white/20"/> Manual review before send</li>
+                  </ul>
+                  <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="w-full py-3 rounded-full bg-[#0A0B0A] border border-white/10 text-white font-medium hover:bg-white/5 transition-colors">
+                    Choose Free
+                  </motion.button>
+                </SpotlightCard>
               </motion.div>
 
               {/* Pro */}
-              <motion.div 
-                variants={staggerItem}
-                whileHover={{ scale: 1.07 }} 
-                className="bg-[#141615] border border-[#BDCDD6] rounded-3xl p-8 relative scale-100 md:scale-105 z-10 shadow-[0_0_40px_rgba(189,205,214,0.1)] hover:shadow-[0_0_50px_rgba(189,205,214,0.2)] transition-shadow duration-300"
-              >
-                <div className="absolute top-0 right-8 -translate-y-1/2 bg-[#BDCDD6] text-[#0A0B0A] px-3 py-1 rounded-full text-xs font-bold uppercase tracking-widest flex items-center gap-1">
-                  <HugeiconsIcon icon={SparklesIcon} className="size-3"/> Popular
-                </div>
-                <h3 className="text-xl font-bold text-white mb-2">Pro</h3>
-                <p className="text-sm text-[#929E96] mb-8">For people who live between meetings and email.</p>
-                <div className="flex items-baseline gap-2 mb-8">
-                  <span className="text-5xl font-black text-white">$12</span>
-                  <span className="text-sm font-medium text-[#929E96]">/ month</span>
-                </div>
-                <ul className="space-y-4 mb-8">
-                  <li className="flex items-center gap-3 text-sm text-[#929E96]"><HugeiconsIcon icon={CheckmarkCircle01Icon} className="size-4 text-[#BDCDD6]"/> Unlimited scheduling prompts</li>
-                  <li className="flex items-center gap-3 text-sm text-[#929E96]"><HugeiconsIcon icon={CheckmarkCircle01Icon} className="size-4 text-[#BDCDD6]"/> Meeting priority tags</li>
-                  <li className="flex items-center gap-3 text-sm text-[#929E96]"><HugeiconsIcon icon={CheckmarkCircle01Icon} className="size-4 text-[#BDCDD6]"/> Automatic follow-up drafts</li>
-                </ul>
-                <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="w-full py-3 rounded-full bg-[#BDCDD6] text-[#0A0B0A] font-bold hover:bg-[#BDCDD6]/90 transition-colors">
-                  Choose Pro
-                </motion.button>
+              <motion.div variants={staggerItem} className="h-full">
+                <SpotlightCard className="p-8 h-full border-[#BDCDD6] shadow-[0_0_40px_rgba(189,205,214,0.1)] relative scale-100 md:scale-105 z-10">
+                  <div className="absolute top-0 right-8 -translate-y-1/2 bg-[#BDCDD6] text-[#0A0B0A] px-3 py-1 rounded-full text-xs font-bold uppercase tracking-widest flex items-center gap-1">
+                    <HugeiconsIcon icon={SparklesIcon} className="size-3"/> Popular
+                  </div>
+                  <h3 className="text-xl font-bold text-white mb-2">Pro</h3>
+                  <p className="text-sm text-[#929E96] mb-8">For people who live between meetings and email.</p>
+                  <div className="flex items-baseline gap-2 mb-8">
+                    <span className="text-5xl font-black text-white">$12</span>
+                    <span className="text-sm font-medium text-[#929E96]">/ month</span>
+                  </div>
+                  <ul className="space-y-4 mb-8">
+                    <li className="flex items-center gap-3 text-sm text-[#929E96]"><HugeiconsIcon icon={CheckmarkCircle01Icon} className="size-4 text-[#BDCDD6]"/> Unlimited scheduling prompts</li>
+                    <li className="flex items-center gap-3 text-sm text-[#929E96]"><HugeiconsIcon icon={CheckmarkCircle01Icon} className="size-4 text-[#BDCDD6]"/> Meeting priority tags</li>
+                    <li className="flex items-center gap-3 text-sm text-[#929E96]"><HugeiconsIcon icon={CheckmarkCircle01Icon} className="size-4 text-[#BDCDD6]"/> Automatic follow-up drafts</li>
+                  </ul>
+                  <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="w-full py-3 rounded-full bg-[#BDCDD6] text-[#0A0B0A] font-bold hover:bg-[#BDCDD6]/90 transition-colors">
+                    Choose Pro
+                  </motion.button>
+                </SpotlightCard>
               </motion.div>
 
               {/* Pro+ */}
-              <motion.div 
-                variants={staggerItem}
-                whileHover={{ scale: 1.02 }} 
-                className="bg-[#141615] border border-white/5 rounded-3xl p-8 hover:border-white/20 transition-colors duration-300 shadow-lg"
-              >
-                <h3 className="text-xl font-bold text-white mb-2">Pro +</h3>
-                <p className="text-sm text-[#929E96] mb-8">For operators who want deeper workflow automation.</p>
-                <div className="flex items-baseline gap-2 mb-8">
-                  <span className="text-5xl font-black text-white">$24</span>
-                  <span className="text-sm font-medium text-[#929E96]">/ month</span>
-                </div>
-                <ul className="space-y-4 mb-8">
-                  <li className="flex items-center gap-3 text-sm text-[#929E96]"><HugeiconsIcon icon={CheckmarkCircle01Icon} className="size-4 text-white/20"/> Shared calendar suggestions</li>
-                  <li className="flex items-center gap-3 text-sm text-[#929E96]"><HugeiconsIcon icon={CheckmarkCircle01Icon} className="size-4 text-white/20"/> Email templates and follow-ups</li>
-                  <li className="flex items-center gap-3 text-sm text-[#929E96]"><HugeiconsIcon icon={CheckmarkCircle01Icon} className="size-4 text-white/20"/> Priority inbox focus mode</li>
-                </ul>
-                <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="w-full py-3 rounded-full bg-[#0A0B0A] border border-white/10 text-white font-medium hover:bg-white/5 transition-colors">
-                  Choose Pro +
-                </motion.button>
+              <motion.div variants={staggerItem} className="h-full">
+                <SpotlightCard className="p-8 h-full">
+                  <h3 className="text-xl font-bold text-white mb-2">Pro +</h3>
+                  <p className="text-sm text-[#929E96] mb-8">For operators who want deeper workflow automation.</p>
+                  <div className="flex items-baseline gap-2 mb-8">
+                    <span className="text-5xl font-black text-white">$24</span>
+                    <span className="text-sm font-medium text-[#929E96]">/ month</span>
+                  </div>
+                  <ul className="space-y-4 mb-8">
+                    <li className="flex items-center gap-3 text-sm text-[#929E96]"><HugeiconsIcon icon={CheckmarkCircle01Icon} className="size-4 text-white/20"/> Shared calendar suggestions</li>
+                    <li className="flex items-center gap-3 text-sm text-[#929E96]"><HugeiconsIcon icon={CheckmarkCircle01Icon} className="size-4 text-white/20"/> Email templates and follow-ups</li>
+                    <li className="flex items-center gap-3 text-sm text-[#929E96]"><HugeiconsIcon icon={CheckmarkCircle01Icon} className="size-4 text-white/20"/> Priority inbox focus mode</li>
+                  </ul>
+                  <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="w-full py-3 rounded-full bg-[#0A0B0A] border border-white/10 text-white font-medium hover:bg-white/5 transition-colors">
+                    Choose Pro +
+                  </motion.button>
+                </SpotlightCard>
               </motion.div>
             </motion.div>
           </motion.div>
