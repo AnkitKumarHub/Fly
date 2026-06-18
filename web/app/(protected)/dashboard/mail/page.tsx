@@ -20,10 +20,8 @@ import { MailList } from "@/components/mail/mail-list"
 import { MailPanels } from "@/components/mail/mail-panels"
 import { MailToolbar } from "@/components/mail/mail-toolbar"
 import {
-  filterByCategory,
   filterByFolder,
   getFolderLabel,
-  type Category,
   type Folder,
 } from "@/components/mail/mail-utils"
 import { useIntegrations } from "@/hooks/use-integrations"
@@ -46,7 +44,6 @@ export default function MailPage() {
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [composeOpen, setComposeOpen] = useState(false)
   const [activeFolder, setActiveFolder] = useState<Folder>("inbox")
-  const [activeCategory, setActiveCategory] = useState<Category>("all")
 
   const { connectedPlugins, isStatusLoading } = useIntegrations()
   const isGmailConnected = connectedPlugins.includes("gmail")
@@ -63,13 +60,10 @@ export default function MailPage() {
   const { data: selectedEmail, isLoading: isDetailLoading } = useEmail(selectedId)
 
   const folderEmails = isSearching ? allEmails : filterByFolder(allEmails, activeFolder)
-  const visibleEmails =
-    activeFolder === "inbox" && !isSearching
-      ? filterByCategory(folderEmails, activeCategory)
-      : folderEmails
+  const visibleEmails = folderEmails
 
   const folderLabel = isSearching ? "Search results" : getFolderLabel(activeFolder)
-  const listKey = `${activeFolder}-${activeCategory}-${isSearching ? activeQuery : "all"}`
+  const listKey = `${activeFolder}-${isSearching ? activeQuery : "all"}`
   const mobileView = isMobile && selectedId ? "detail" : "list"
 
   function markEmailRead(emailId: string) {
@@ -121,7 +115,6 @@ export default function MailPage() {
 
   function handleFolderSelect(folder: Folder) {
     setActiveFolder(folder)
-    setActiveCategory("all")
     setSelectedId(null)
     setSearch("")
     setActiveQuery("")
@@ -178,16 +171,13 @@ export default function MailPage() {
     <div className="flex h-[calc(100vh-var(--header-height))] flex-col overflow-hidden">
       <MailToolbar
         activeFolder={activeFolder}
-        activeCategory={activeCategory}
         search={search}
         isSearching={isSearching}
         isSyncing={syncInbox.isPending}
-        showCategories={activeFolder === "inbox" && !isSearching}
         showBack={isMobile && !!selectedId}
         reducedMotion={reducedMotion}
         allEmails={allEmails}
         onFolderChange={handleFolderSelect}
-        onCategoryChange={setActiveCategory}
         onSearchChange={handleSearchChange}
         onSearchSubmit={handleSearchSubmit}
         onSync={handleSync}

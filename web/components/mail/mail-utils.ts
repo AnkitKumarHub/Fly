@@ -76,23 +76,6 @@ export function formatDate(internalDate?: string) {
   })
 }
 
-const AVATAR_COLORS = [
-  "bg-emerald-500/15 text-emerald-700 dark:text-emerald-400",
-  "bg-orange-500/15 text-orange-700 dark:text-orange-400",
-  "bg-amber-500/15 text-amber-700 dark:text-amber-400",
-  "bg-sky-500/15 text-sky-700 dark:text-sky-400",
-  "bg-violet-500/15 text-violet-700 dark:text-violet-400",
-  "bg-rose-500/15 text-rose-700 dark:text-rose-400",
-] as const
-
-export function getAvatarColor(name: string) {
-  let hash = 0
-  for (let i = 0; i < name.length; i++) {
-    hash = name.charCodeAt(i) + ((hash << 5) - hash)
-  }
-  return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length]
-}
-
 export function getInitials(name: string) {
   const parts = name.trim().split(/\s+/).filter(Boolean)
   if (parts.length === 0) return "?"

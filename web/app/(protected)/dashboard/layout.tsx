@@ -23,8 +23,8 @@ export default function DashboardLayout({
         <SiteHeader />
         <DashboardRealtime />
         <IntegrationsPrefetch />
-        <div className="flex flex-1 flex-col bg-background">
-          <div className="@container/main flex flex-1 flex-col gap-2">
+        <div className="flex min-h-0 flex-1 flex-col overflow-hidden bg-background">
+          <div className="@container/main flex min-h-0 flex-1 flex-col gap-2 overflow-hidden">
             {children}
           </div>
         </div>

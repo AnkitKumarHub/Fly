@@ -54,7 +54,7 @@ export function MailDetail({ email, emailId, isLoading, reducedMotion }: MailDet
               <HugeiconsIcon
                 icon={StarIcon}
                 strokeWidth={2}
-                className="mt-1 size-4 shrink-0 text-amber-400"
+                className="mt-1 size-4 shrink-0 text-muted-foreground"
               />
             ) : null}
           </div>

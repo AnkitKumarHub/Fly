@@ -6,13 +6,7 @@ import { StarIcon } from "@hugeicons/core-free-icons"
 
 import { cn } from "@/lib/utils"
 import type { EmailListItem } from "@/hooks/use-emails"
-import {
-  formatDate,
-  formatSender,
-  getAvatarColor,
-  getInitials,
-  hasLabel,
-} from "@/components/mail/mail-utils"
+import { formatDate, formatSender, getInitials, hasLabel } from "@/components/mail/mail-utils"
 import { listItemVariants } from "@/components/mail/mail-motion"
 
 type MailRowProps = {
@@ -30,29 +24,18 @@ export function MailRow({ email, active, reducedMotion, onSelect }: MailRowProps
   const snippet = email.snippet?.trim()
 
   return (
-    <motion.li
-      variants={reducedMotion ? undefined : listItemVariants}
-      whileHover={reducedMotion ? undefined : { scale: 1.005 }}
-      transition={{ duration: 0.15 }}
-    >
+    <motion.li variants={reducedMotion ? undefined : listItemVariants}>
       <button
         type="button"
         onClick={onSelect}
         aria-current={active ? "true" : undefined}
         className={cn(
-          "w-full rounded-2xl px-4 py-3.5 text-left transition-colors",
-          active
-            ? "bg-muted shadow-sm ring-1 ring-border/50"
-            : "bg-muted/25 hover:bg-muted/50",
+          "w-full rounded-xl px-3 py-3 text-left transition-colors",
+          active ? "bg-muted/80" : "hover:bg-muted/40",
         )}
       >
         <span className="flex items-start gap-3">
-          <span
-            className={cn(
-              "flex size-9 shrink-0 items-center justify-center rounded-full text-xs font-semibold",
-              getAvatarColor(sender),
-            )}
-          >
+          <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-muted text-[11px] font-medium text-muted-foreground">
             {getInitials(sender)}
           </span>
 
@@ -60,12 +43,15 @@ export function MailRow({ email, active, reducedMotion, onSelect }: MailRowProps
             <span className="flex items-center justify-between gap-2">
               <span className="flex min-w-0 items-center gap-1.5">
                 {isUnread ? (
-                  <span className="size-1.5 shrink-0 rounded-full bg-primary" aria-hidden />
+                  <span
+                    className="size-1.5 shrink-0 rounded-full bg-foreground/50"
+                    aria-hidden
+                  />
                 ) : null}
                 <span
                   className={cn(
                     "truncate text-sm",
-                    isUnread ? "font-semibold text-foreground" : "font-medium text-foreground/90",
+                    isUnread ? "font-semibold text-foreground" : "font-medium text-foreground/80",
                   )}
                 >
                   {sender}
@@ -76,10 +62,10 @@ export function MailRow({ email, active, reducedMotion, onSelect }: MailRowProps
                   <HugeiconsIcon
                     icon={StarIcon}
                     strokeWidth={2}
-                    className="size-3 text-amber-400"
+                    className="size-3 text-muted-foreground"
                   />
                 ) : null}
-                <span className="text-xs text-muted-foreground">
+                <span className="text-xs tabular-nums text-muted-foreground">
                   {formatDate(email.internalDate)}
                 </span>
               </span>
@@ -87,8 +73,8 @@ export function MailRow({ email, active, reducedMotion, onSelect }: MailRowProps
 
             <span
               className={cn(
-                "mt-1 block truncate text-sm",
-                isUnread ? "font-semibold text-foreground" : "font-medium text-foreground/80",
+                "mt-0.5 block truncate text-sm",
+                isUnread ? "font-medium text-foreground" : "text-foreground/75",
               )}
             >
               {subject}

@@ -68,7 +68,7 @@ export function MailList({
       initial={reducedMotion ? false : "hidden"}
       animate="show"
       variants={reducedMotion ? undefined : listContainerVariants}
-      className="no-scrollbar flex flex-1 flex-col gap-2 overflow-y-auto p-3"
+      className="no-scrollbar flex flex-1 flex-col gap-0.5 overflow-y-auto px-2 py-2"
     >
       {emails.map((email) => (
         <MailRow

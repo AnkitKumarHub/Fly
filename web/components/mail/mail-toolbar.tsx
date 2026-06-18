@@ -12,29 +12,19 @@ import {
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { cn } from "@/lib/utils"
-import type { Category, Folder } from "@/components/mail/mail-utils"
-import {
-  CATEGORIES,
-  FOLDERS,
-  getFolderLabel,
-  getInboxUnreadCount,
-} from "@/components/mail/mail-utils"
+import type { Folder } from "@/components/mail/mail-utils"
+import { FOLDERS, getFolderLabel, getInboxUnreadCount } from "@/components/mail/mail-utils"
 import type { EmailListItem } from "@/hooks/use-emails"
-
-const INBOX_CATEGORIES = CATEGORIES.filter((c) => c.id !== "all")
 
 type MailToolbarProps = {
   activeFolder: Folder
-  activeCategory: Category
   search: string
   isSearching: boolean
   isSyncing: boolean
-  showCategories: boolean
   showBack: boolean
   reducedMotion: boolean
   allEmails: EmailListItem[]
   onFolderChange: (folder: Folder) => void
-  onCategoryChange: (category: Category) => void
   onSearchChange: (value: string) => void
   onSearchSubmit: (event: React.FormEvent) => void
   onSync: () => void
@@ -44,16 +34,13 @@ type MailToolbarProps = {
 
 export function MailToolbar({
   activeFolder,
-  activeCategory,
   search,
   isSearching,
   isSyncing,
-  showCategories,
   showBack,
   reducedMotion,
   allEmails,
   onFolderChange,
-  onCategoryChange,
   onSearchChange,
   onSearchSubmit,
   onSync,
@@ -64,7 +51,7 @@ export function MailToolbar({
   const title = isSearching ? "Search" : getFolderLabel(activeFolder)
 
   return (
-    <div className="shrink-0 space-y-4 px-5 pb-4 pt-5 md:px-6">
+    <div className="shrink-0 space-y-3 px-5 pb-3 pt-5 md:px-6">
       <div className="flex items-center gap-3">
         {showBack ? (
           <Button variant="ghost" size="icon-sm" onClick={onBack} aria-label="Back to list">
@@ -79,7 +66,10 @@ export function MailToolbar({
           ) : null}
         </div>
 
-        <form onSubmit={onSearchSubmit} className="relative mx-auto hidden min-w-0 max-w-md flex-1 md:block">
+        <form
+          onSubmit={onSearchSubmit}
+          className="relative mx-auto hidden min-w-0 max-w-sm flex-1 md:block"
+        >
           <HugeiconsIcon
             icon={SearchIcon}
             strokeWidth={2}
@@ -87,7 +77,7 @@ export function MailToolbar({
           />
           <Input
             placeholder="Search emails..."
-            className="h-9 rounded-full border-border/50 bg-muted/40 pl-10 shadow-none"
+            className="h-9 rounded-full border-border/40 bg-muted/30 pl-10 shadow-none"
             value={search}
             onChange={(event) => onSearchChange(event.target.value)}
           />
@@ -100,7 +90,7 @@ export function MailToolbar({
             onClick={onSync}
             disabled={isSyncing}
             aria-label="Sync inbox"
-            className="rounded-full"
+            className="rounded-full text-muted-foreground"
           >
             <motion.span
               animate={isSyncing && !reducedMotion ? { rotate: 360 } : { rotate: 0 }}
@@ -114,7 +104,7 @@ export function MailToolbar({
               <HugeiconsIcon icon={RefreshIcon} strokeWidth={2} className="size-4" />
             </motion.span>
           </Button>
-          <motion.div whileTap={reducedMotion ? undefined : { scale: 0.97 }}>
+          <motion.div whileTap={reducedMotion ? undefined : { scale: 0.98 }}>
             <Button size="sm" onClick={onCompose} className="rounded-full px-4">
               <HugeiconsIcon icon={PencilEdit01Icon} strokeWidth={2} className="size-4" />
               Compose
@@ -131,56 +121,24 @@ export function MailToolbar({
         />
         <Input
           placeholder="Search emails..."
-          className="h-9 rounded-full border-border/50 bg-muted/40 pl-10 shadow-none"
+          className="h-9 rounded-full border-border/40 bg-muted/30 pl-10 shadow-none"
           value={search}
           onChange={(event) => onSearchChange(event.target.value)}
         />
       </form>
 
       {!isSearching ? (
-        <div className="no-scrollbar flex gap-1.5 overflow-x-auto">
+        <div className="no-scrollbar flex gap-2 overflow-x-auto">
           {FOLDERS.map(({ id, label }) => (
             <button
               key={id}
               type="button"
               onClick={() => onFolderChange(id)}
               className={cn(
-                "shrink-0 rounded-full px-3.5 py-1.5 text-sm font-medium transition-colors",
+                "shrink-0 rounded-full border px-3.5 py-1 text-sm font-medium transition-colors",
                 activeFolder === id
-                  ? "bg-foreground text-background"
-                  : "text-muted-foreground hover:bg-muted/60 hover:text-foreground",
-              )}
-            >
-              {label}
-            </button>
-          ))}
-        </div>
-      ) : null}
-
-      {showCategories ? (
-        <div className="no-scrollbar flex gap-5 overflow-x-auto border-b border-border/30">
-          <button
-            type="button"
-            onClick={() => onCategoryChange("all")}
-            className={cn(
-              "shrink-0 border-b-2 pb-2.5 text-sm font-medium transition-colors",
-              activeCategory === "all"
-                ? "border-foreground text-foreground"
-                : "border-transparent text-muted-foreground hover:text-foreground",
-            )}
-          >
-            All
-          </button>
-          {INBOX_CATEGORIES.map(({ id, label }) => (
-            <button
-              key={id}
-              type="button"
-              onClick={() => onCategoryChange(id)}
-              className={cn(
-                "shrink-0 border-b-2 pb-2.5 text-sm font-medium transition-colors",
-                activeCategory === id
-                  ? "border-foreground text-foreground"
-                  : "border-transparent text-muted-foreground hover:text-foreground",
+                  ? "border-border bg-muted text-foreground"
+                  : "border-transparent text-muted-foreground hover:border-border/60 hover:bg-muted/40 hover:text-foreground",
               )}
             >
               {label}
