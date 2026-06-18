@@ -24,18 +24,18 @@ export function DashboardGreeting({ name, reducedMotion }: DashboardGreetingProp
       animate="animate"
       variants={greetingVariants}
       transition={dashboardTransition(reducedMotion, dashboardDuration.normal)}
-      className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between"
+      className="flex flex-col justify-between gap-6 lg:flex-row lg:items-end"
     >
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight text-foreground">
+      <div className="max-w-xl space-y-2">
+        <p className="text-sm text-muted-foreground">{dateLabel}</p>
+        <h1 className="text-3xl font-semibold tracking-tight text-foreground md:text-4xl">
           {greeting}
           {name ? `, ${name}` : ""}
         </h1>
-        <p className="mt-1 text-sm text-muted-foreground">
+        <p className="text-base leading-relaxed text-muted-foreground">
           Here&apos;s what needs your attention today.
         </p>
       </div>
-      <p className="text-sm text-muted-foreground">{dateLabel}</p>
     </motion.div>
   )
 }

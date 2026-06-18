@@ -14,6 +14,7 @@ import {
   dashboardTransition,
   cardVariants,
 } from "@/components/dashboard/dashboard-motion"
+import { dashboardTokens } from "@/components/dashboard/dashboard-tokens"
 import { getPriorityEmails } from "@/components/dashboard/dashboard-utils"
 
 type DashboardPriorityEmailsProps = {
@@ -33,33 +34,37 @@ export function DashboardPriorityEmails({
   return (
     <motion.section
       variants={cardVariants}
-      className="flex min-h-[220px] flex-col rounded-2xl border border-[#b0e8c8]/40 bg-[#D1F8E1]/20 p-5"
+      className={dashboardTokens.card}
     >
-      <div className="flex items-center justify-between gap-2">
-        <div className="flex items-center gap-2">
-          <span className="flex size-8 items-center justify-center rounded-lg bg-[#D1F8E1] text-[#1a3d2e]">
+      <div className="flex items-center justify-between gap-3 border-b border-border/30 pb-5">
+        <div className="flex items-center gap-3">
+          <span className={dashboardTokens.cardIcon}>
             <HugeiconsIcon icon={Mail01Icon} strokeWidth={2} className="size-4" />
           </span>
-          <h2 className="text-sm font-semibold text-foreground">Priority mail</h2>
+          <div>
+            <h2 className="text-base font-medium text-foreground">Priority mail</h2>
+            <p className="text-xs text-muted-foreground">Unread in your inbox</p>
+          </div>
         </div>
-        {!isLoading && unreadCount > 0 ? (
-          <span className="rounded-full bg-[#D1F8E1] px-2 py-0.5 text-[11px] font-medium text-[#1a3d2e]">
-            {unreadCount}
-          </span>
+        {!isLoading ? (
+          <span className={dashboardTokens.countBadge}>{unreadCount}</span>
         ) : null}
       </div>
 
-      <div className="mt-4 flex flex-1 flex-col gap-2">
+      <div className="mt-5 flex flex-1 flex-col gap-2.5">
         {isLoading ? (
           <>
-            <Skeleton className="h-12 w-full rounded-xl" />
-            <Skeleton className="h-12 w-full rounded-xl" />
-            <Skeleton className="h-12 w-full rounded-xl" />
+            <Skeleton className="h-14 w-full rounded-xl" />
+            <Skeleton className="h-14 w-full rounded-xl" />
+            <Skeleton className="h-14 w-full rounded-xl" />
           </>
         ) : priorityEmails.length === 0 ? (
-          <p className="flex flex-1 items-center justify-center text-sm text-muted-foreground">
-            You&apos;re caught up — no unread mail in your inbox.
-          </p>
+          <div className="flex flex-1 flex-col items-center justify-center gap-2 py-8 text-center">
+            <p className="text-sm font-medium text-foreground/80">You&apos;re caught up</p>
+            <p className="max-w-[16rem] text-sm text-muted-foreground">
+              No unread mail in your inbox right now.
+            </p>
+          </div>
         ) : (
           priorityEmails.map((email) => (
             <motion.div
@@ -70,17 +75,17 @@ export function DashboardPriorityEmails({
               <Link
                 href="/dashboard/mail"
                 className={cn(
-                  "flex items-start gap-2 rounded-xl border border-transparent bg-card/60 px-3 py-2.5",
-                  "transition-colors hover:border-[#b0e8c8]/50 hover:bg-[#D1F8E1]/25",
+                  dashboardTokens.row,
+                  "flex items-start gap-3",
                   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40",
                 )}
               >
-                <span className="mt-1.5 size-1.5 shrink-0 rounded-full bg-[#1a3d2e]" />
+                <span className={cn(dashboardTokens.rowDot, "mt-2")} />
                 <span className="min-w-0 flex-1">
                   <span className="block truncate text-sm font-medium text-foreground">
                     {email.subject || "(no subject)"}
                   </span>
-                  <span className="mt-0.5 block truncate text-xs text-muted-foreground">
+                  <span className="mt-1 block truncate text-xs text-muted-foreground">
                     {formatSender(email.from)}
                     {email.internalDate ? ` · ${formatDate(email.internalDate)}` : ""}
                   </span>
@@ -91,10 +96,7 @@ export function DashboardPriorityEmails({
         )}
       </div>
 
-      <Link
-        href="/dashboard/mail"
-        className="mt-4 inline-flex items-center gap-1 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground"
-      >
+      <Link href="/dashboard/mail" className={cn(dashboardTokens.footerLink, "mt-6")}>
         View all mail
         <HugeiconsIcon icon={ArrowRight01Icon} strokeWidth={2} className="size-3.5" />
       </Link>

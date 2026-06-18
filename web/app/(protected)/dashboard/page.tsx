@@ -14,6 +14,7 @@ import {
   dashboardTransition,
   dashboardDuration,
 } from "@/components/dashboard/dashboard-motion"
+import { dashboardTokens } from "@/components/dashboard/dashboard-tokens"
 import {
   getTodayEventCount,
   getUnreadInboxCount,
@@ -40,42 +41,45 @@ export default function DashboardPage() {
     isStatusLoading || (isGmailConnected && isEmailsLoading) || (isCalendarConnected && isEventsLoading)
 
   return (
-    <div className="mx-auto flex w-full max-w-5xl flex-col gap-6 px-6 py-8 md:px-10 md:py-10">
-      <DashboardGreeting name={me?.firstName} reducedMotion={reducedMotion} />
+    <div className={dashboardTokens.page}>
+      <header className={dashboardTokens.header}>
+        <DashboardGreeting name={me?.firstName} reducedMotion={reducedMotion} />
+        <DashboardQuickActions unreadCount={unreadCount} todayCount={todayCount} />
+      </header>
 
-      <DashboardQuickActions unreadCount={unreadCount} todayCount={todayCount} />
+      <div className={dashboardTokens.body}>
+        {showDataSkeleton ? (
+          <DashboardSkeleton />
+        ) : (
+          <motion.div
+            initial={reducedMotion ? false : "hidden"}
+            animate="show"
+            variants={cardContainerVariants}
+            transition={dashboardTransition(reducedMotion, dashboardDuration.normal)}
+            className={dashboardTokens.grid}
+          >
+            {isGmailConnected ? (
+              <DashboardPriorityEmails
+                emails={emails}
+                isLoading={isEmailsLoading}
+                reducedMotion={reducedMotion}
+              />
+            ) : (
+              <DashboardConnectCard plugin="gmail" reducedMotion={reducedMotion} />
+            )}
 
-      {showDataSkeleton ? (
-        <DashboardSkeleton />
-      ) : (
-        <motion.div
-          initial={reducedMotion ? false : "hidden"}
-          animate="show"
-          variants={cardContainerVariants}
-          transition={dashboardTransition(reducedMotion, dashboardDuration.normal)}
-          className="grid gap-4 md:grid-cols-2"
-        >
-          {isGmailConnected ? (
-            <DashboardPriorityEmails
-              emails={emails}
-              isLoading={isEmailsLoading}
-              reducedMotion={reducedMotion}
-            />
-          ) : (
-            <DashboardConnectCard plugin="gmail" reducedMotion={reducedMotion} />
-          )}
-
-          {isCalendarConnected ? (
-            <DashboardTodayEvents
-              events={events}
-              isLoading={isEventsLoading}
-              reducedMotion={reducedMotion}
-            />
-          ) : (
-            <DashboardConnectCard plugin="googlecalendar" reducedMotion={reducedMotion} />
-          )}
-        </motion.div>
-      )}
+            {isCalendarConnected ? (
+              <DashboardTodayEvents
+                events={events}
+                isLoading={isEventsLoading}
+                reducedMotion={reducedMotion}
+              />
+            ) : (
+              <DashboardConnectCard plugin="googlecalendar" reducedMotion={reducedMotion} />
+            )}
+          </motion.div>
+        )}
+      </div>
     </div>
   )
 }
