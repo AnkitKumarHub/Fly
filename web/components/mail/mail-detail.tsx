@@ -47,7 +47,7 @@ export function MailDetail({ email, emailId, isLoading, reducedMotion }: MailDet
       >
         <div className="space-y-2">
           <div className="flex items-start justify-between gap-3">
-            <h2 className="text-xl font-semibold tracking-tight text-foreground md:text-2xl">
+            <h2 className="text-xl font-medium tracking-tight text-foreground/85 md:text-2xl">
               {email.subject || "(no subject)"}
             </h2>
             {isStarred ? (
@@ -58,7 +58,7 @@ export function MailDetail({ email, emailId, isLoading, reducedMotion }: MailDet
               />
             ) : null}
           </div>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-sm text-muted-foreground/75">
             {email.from}
             {email.to ? ` · to ${email.to}` : null}
             {email.date ? ` · ${email.date}` : null}
@@ -96,7 +96,7 @@ function MailEmptyDetail({ reducedMotion }: { reducedMotion: boolean }) {
       <span className="flex size-14 items-center justify-center rounded-2xl bg-muted/40">
         <HugeiconsIcon icon={Mail01Icon} strokeWidth={2} className="size-6 text-muted-foreground/60" />
       </span>
-      <p className="text-sm text-muted-foreground">Select an email to read it</p>
+      <p className="text-sm text-muted-foreground/70">Select an email to read it</p>
     </motion.div>
   )
 }

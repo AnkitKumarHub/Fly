@@ -3,108 +3,78 @@
 import Link from "next/link"
 import { useEffect, useState } from "react"
 import { toast } from "sonner"
+import { AnimatePresence, motion, useReducedMotion } from "motion/react"
 import { HugeiconsIcon } from "@hugeicons/react"
-import {
-  Calendar03Icon,
-  PencilEdit01Icon,
-  RefreshIcon,
-  SearchIcon,
-} from "@hugeicons/core-free-icons"
+import { Calendar03Icon } from "@hugeicons/core-free-icons"
 
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 import { Skeleton } from "@/components/ui/skeleton"
-import { cn } from "@/lib/utils"
 import { EventSheet } from "@/components/event-sheet"
+import { CalendarDayView } from "@/components/calendar/calendar-day-view"
+import { CalendarEventDetailSheet } from "@/components/calendar/calendar-event-detail-sheet"
+import { CalendarMonthView } from "@/components/calendar/calendar-month-view"
+import { CalendarToolbar } from "@/components/calendar/calendar-toolbar"
+import { CalendarWeekView } from "@/components/calendar/calendar-week-view"
 import {
   IntegrationReconnectBanner,
   isIntegrationNotConnectedError,
 } from "@/components/integration-reconnect-banner"
+import {
+  calendarDuration,
+  calendarTransition,
+  viewVariants,
+} from "@/components/calendar/calendar-motion"
+import {
+  addDays,
+  addMonths,
+  filterEventsByQuery,
+  getCalendarTitle,
+  type CalendarView,
+} from "@/components/calendar/calendar-utils"
 import { useIntegrations } from "@/hooks/use-integrations"
 import {
   useEvent,
   useEvents,
   useSearchEvents,
   useSyncEvents,
-  type EventDateTime,
-  type EventListItem,
+  type EventDetail,
 } from "@/hooks/use-events"
 
-function formatEventTime(dateTime?: EventDateTime) {
-  if (!dateTime) return ""
-  if (dateTime.date) {
-    return new Date(`${dateTime.date}T00:00:00`).toLocaleDateString(undefined, {
-      month: "short",
-      day: "numeric",
-    })
-  }
-  if (!dateTime.dateTime) return ""
-
-  const parsed = new Date(dateTime.dateTime)
-  if (Number.isNaN(parsed.getTime())) return ""
-
-  return parsed.toLocaleString(undefined, {
-    month: "short",
-    day: "numeric",
-    hour: "numeric",
-    minute: "2-digit",
-  })
-}
-
-function formatEventRange(start?: EventDateTime, end?: EventDateTime) {
-  const startLabel = formatEventTime(start)
-  const endLabel = formatEventTime(end)
-  if (!startLabel) return ""
-  if (!endLabel) return startLabel
-  return `${startLabel} – ${endLabel}`
-}
-
-const SEEN_EVENTS_KEY = "fly_seen_events"
-
-function readSeenEventIds(): Set<string> {
-  if (typeof window === "undefined") return new Set()
-
-  try {
-    const raw = sessionStorage.getItem(SEEN_EVENTS_KEY)
-    return new Set(raw ? (JSON.parse(raw) as string[]) : [])
-  } catch {
-    return new Set()
-  }
-}
-
-function writeSeenEventIds(ids: Set<string>) {
-  sessionStorage.setItem(SEEN_EVENTS_KEY, JSON.stringify([...ids]))
-}
-
 export default function CalendarPage() {
+  const reducedMotion = useReducedMotion() ?? false
+
+  const [view, setView] = useState<CalendarView>("month")
+  const [focusDate, setFocusDate] = useState(() => new Date())
   const [search, setSearch] = useState("")
   const [activeQuery, setActiveQuery] = useState("")
   const [selectedId, setSelectedId] = useState<string | null>(null)
+  const [detailOpen, setDetailOpen] = useState(false)
   const [sheetOpen, setSheetOpen] = useState(false)
-  const [editingEvent, setEditingEvent] = useState<import("@/hooks/use-events").EventDetail | null>(
-    null,
-  )
-  const [seenEventIds, setSeenEventIds] = useState<Set<string>>(new Set())
-
-  useEffect(() => {
-    setSeenEventIds(readSeenEventIds())
-  }, [])
+  const [editingEvent, setEditingEvent] = useState<EventDetail | null>(null)
 
   const { connectedPlugins, isStatusLoading } = useIntegrations()
   const isCalendarConnected = connectedPlugins.includes("googlecalendar")
 
   const isSearching = activeQuery.trim().length > 0
-  const listQuery = useEvents()
-  const searchQuery = useSearchEvents(activeQuery)
+  const listQuery = useEvents(100)
+  const searchQuery = useSearchEvents(activeQuery, 100)
   const syncEvents = useSyncEvents()
 
-  const { data: events, isLoading, error: listError } = isSearching ? searchQuery : listQuery
+  const { data: events = [], isLoading, error: listError } = isSearching ? searchQuery : listQuery
   const showReconnect = isIntegrationNotConnectedError(listError)
   const { data: selectedEvent, isLoading: isDetailLoading } = useEvent(selectedId)
+
+  const visibleEvents = isSearching ? filterEventsByQuery(events, activeQuery) : events
+  const title = getCalendarTitle(view, focusDate)
 
   function handleSearchSubmit(event: React.FormEvent) {
     event.preventDefault()
     setActiveQuery(search)
+  }
+
+  function handleSearchChange(value: string) {
+    setSearch(value)
+    if (value === "") setActiveQuery("")
   }
 
   function handleSync() {
@@ -122,21 +92,60 @@ export default function CalendarPage() {
   function handleEdit() {
     if (!selectedEvent) return
     setEditingEvent(selectedEvent)
+    setDetailOpen(false)
     setSheetOpen(true)
   }
 
   function handleSelectEvent(eventId: string) {
     setSelectedId(eventId)
-    setSeenEventIds((current) => {
-      const next = new Set(current)
-      next.add(eventId)
-      writeSeenEventIds(next)
-      return next
-    })
+    setDetailOpen(true)
   }
 
+  function handleSelectDay(date: Date) {
+    setFocusDate(date)
+    if (view === "month") {
+      setView("day")
+    }
+  }
+
+  function handlePrevious() {
+    if (view === "month") {
+      setFocusDate((current) => addMonths(current, -1))
+      return
+    }
+    if (view === "week") {
+      setFocusDate((current) => addDays(current, -7))
+      return
+    }
+    setFocusDate((current) => addDays(current, -1))
+  }
+
+  function handleNext() {
+    if (view === "month") {
+      setFocusDate((current) => addMonths(current, 1))
+      return
+    }
+    if (view === "week") {
+      setFocusDate((current) => addDays(current, 7))
+      return
+    }
+    setFocusDate((current) => addDays(current, 1))
+  }
+
+  function handleToday() {
+    setFocusDate(new Date())
+  }
+
+  useEffect(() => {
+    if (!detailOpen) {
+      const timeout = window.setTimeout(() => setSelectedId(null), 220)
+      return () => window.clearTimeout(timeout)
+    }
+    return undefined
+  }, [detailOpen])
+
   if (isStatusLoading) {
-    return <CalendarStatusSkeleton />
+    return <CalendarPageSkeleton />
   }
 
   if (!isCalendarConnected) {
@@ -153,256 +162,149 @@ export default function CalendarPage() {
   }
 
   return (
-    <div className="flex h-[calc(100vh-var(--header-height))] flex-col">
-      <div className="flex items-center justify-between gap-4 border-b border-border px-6 py-4">
-        <h1 className="text-xl font-semibold tracking-tight">Calendar</h1>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" onClick={handleSync} disabled={syncEvents.isPending}>
-            <HugeiconsIcon icon={RefreshIcon} strokeWidth={2} className="size-4" />
-            {syncEvents.isPending ? "Syncing..." : "Sync"}
-          </Button>
-          <Button size="sm" onClick={handleCreate}>
-            <HugeiconsIcon icon={PencilEdit01Icon} strokeWidth={2} className="size-4" />
-            New event
-          </Button>
-        </div>
-      </div>
+    <div className="flex h-[calc(100vh-var(--header-height))] min-h-0 flex-col">
+      <CalendarToolbar
+        title={title}
+        view={view}
+        search={search}
+        isSearching={isSearching}
+        isLoading={isLoading}
+        isSyncing={syncEvents.isPending}
+        reducedMotion={reducedMotion}
+        onViewChange={setView}
+        onSearchChange={handleSearchChange}
+        onSearchSubmit={handleSearchSubmit}
+        onPrevious={handlePrevious}
+        onNext={handleNext}
+        onToday={handleToday}
+        onSync={handleSync}
+        onCreate={handleCreate}
+      />
 
       {showReconnect ? (
-        <div className="border-b border-border px-6 py-3">
+        <div className="border-b border-border/60 px-4 py-3 md:px-6">
           <IntegrationReconnectBanner message="Reconnect Google Calendar on the integrations page to continue." />
         </div>
       ) : null}
 
-      <div className="flex min-h-0 flex-1">
-        <div className="flex w-full max-w-sm flex-col border-r border-border">
-          <form onSubmit={handleSearchSubmit} className="border-b border-border p-3">
-            <div className="relative">
-              <HugeiconsIcon
-                icon={SearchIcon}
-                strokeWidth={2}
-                className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
-              />
-              <Input
-                placeholder="Search events..."
-                className="pl-9"
-                value={search}
-                onChange={(event) => {
-                  setSearch(event.target.value)
-                  if (event.target.value === "") setActiveQuery("")
-                }}
-              />
-            </div>
-          </form>
-
-          <div className="flex-1 overflow-y-auto">
-            {isLoading ? (
-              <div className="flex flex-col gap-2 p-3">
-                {Array.from({ length: 6 }).map((_, index) => (
-                  <Skeleton key={index} className="h-16 w-full rounded-lg" />
-                ))}
-              </div>
-            ) : !events || events.length === 0 ? (
-              <EmptyList isSearching={isSearching} />
-            ) : (
-              <ul>
-                {events.map((event) => (
-                  <EventRow
-                    key={event.id}
-                    event={event}
-                    active={event.id === selectedId}
-                    isUnseen={!seenEventIds.has(event.id)}
-                    onSelect={() => handleSelectEvent(event.id)}
-                  />
-                ))}
-              </ul>
-            )}
-          </div>
-        </div>
-
-        <div className="min-w-0 flex-1 overflow-y-auto">
-          {!selectedId ? (
-            <EmptyDetail />
-          ) : isDetailLoading ? (
-            <div className="flex flex-col gap-3 p-8">
-              <Skeleton className="h-8 w-2/3" />
-              <Skeleton className="h-4 w-1/3" />
-              <Skeleton className="mt-4 h-32 w-full" />
-            </div>
-          ) : selectedEvent ? (
-            <EventDetailView event={selectedEvent} onEdit={handleEdit} />
-          ) : null}
-        </div>
+      <div className="relative min-h-0 flex-1 overflow-hidden">
+        {isLoading ? (
+          <CalendarGridSkeleton view={view} />
+        ) : visibleEvents.length === 0 && !isSearching ? (
+          <CalendarEmptyState onCreate={handleCreate} onSync={handleSync} />
+        ) : (
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={view}
+              variants={viewVariants}
+              initial={reducedMotion ? false : "initial"}
+              animate="animate"
+              exit={reducedMotion ? undefined : "exit"}
+              transition={calendarTransition(reducedMotion, calendarDuration.view)}
+              className="h-full"
+            >
+              {view === "month" ? (
+                <CalendarMonthView
+                  focusDate={focusDate}
+                  events={visibleEvents}
+                  reducedMotion={reducedMotion}
+                  onSelectDay={handleSelectDay}
+                  onSelectEvent={handleSelectEvent}
+                />
+              ) : null}
+              {view === "week" ? (
+                <CalendarWeekView
+                  focusDate={focusDate}
+                  events={visibleEvents}
+                  reducedMotion={reducedMotion}
+                  onSelectDay={setFocusDate}
+                  onSelectEvent={handleSelectEvent}
+                />
+              ) : null}
+              {view === "day" ? (
+                <CalendarDayView
+                  focusDate={focusDate}
+                  events={visibleEvents}
+                  reducedMotion={reducedMotion}
+                  onSelectEvent={handleSelectEvent}
+                />
+              ) : null}
+            </motion.div>
+          </AnimatePresence>
+        )}
       </div>
+
+      <CalendarEventDetailSheet
+        open={detailOpen}
+        onOpenChange={setDetailOpen}
+        event={selectedEvent}
+        isLoading={isDetailLoading}
+        onEdit={handleEdit}
+      />
 
       <EventSheet open={sheetOpen} onOpenChange={setSheetOpen} event={editingEvent} />
     </div>
   )
 }
 
-function EventRow({
-  event,
-  active,
-  isUnseen,
-  onSelect,
+function CalendarEmptyState({
+  onCreate,
+  onSync,
 }: {
-  event: EventListItem
-  active: boolean
-  isUnseen: boolean
-  onSelect: () => void
+  onCreate: () => void
+  onSync: () => void
 }) {
   return (
-    <li>
-      <button
-        type="button"
-        onClick={onSelect}
-        className={cn(
-          "flex w-full flex-col gap-1 border-b border-border/60 px-4 py-3 text-left transition-colors hover:bg-muted/50",
-          isUnseen ? "bg-primary/5" : "bg-background",
-          active && "bg-muted",
-        )}
-      >
-        <div className="flex items-center justify-between gap-2">
-          <span
-            className={cn(
-              "truncate text-sm text-foreground",
-              isUnseen ? "font-semibold" : "font-medium",
-            )}
-          >
-            {event.summary || "(no title)"}
-          </span>
-          <span className="shrink-0 text-xs text-muted-foreground">
-            {formatEventTime(event.start)}
-          </span>
-        </div>
-        <span className="truncate text-xs text-muted-foreground">
-          {formatEventRange(event.start, event.end)}
-        </span>
-        {event.location ? (
-          <span className="truncate text-xs text-muted-foreground">{event.location}</span>
-        ) : null}
-      </button>
-    </li>
-  )
-}
-
-function EventDetailView({
-  event,
-  onEdit,
-}: {
-  event: import("@/hooks/use-events").EventDetail
-  onEdit: () => void
-}) {
-  return (
-    <div className="mx-auto flex max-w-3xl flex-col gap-4 px-8 py-8">
-      <div className="flex items-start justify-between gap-4">
-        <h2 className="text-2xl font-semibold tracking-tight text-foreground">
-          {event.summary || "(no title)"}
-        </h2>
-        <Button variant="outline" size="sm" onClick={onEdit}>
-          Edit
+    <div className="flex h-full flex-col items-center justify-center gap-3 px-6 text-center">
+      <HugeiconsIcon icon={Calendar03Icon} strokeWidth={2} className="size-10 text-muted-foreground/70" />
+      <p className="text-sm font-medium text-foreground">No events on your calendar</p>
+      <p className="max-w-sm text-xs text-muted-foreground">
+        Sync from Google Calendar or add your first event to get started.
+      </p>
+      <div className="flex items-center gap-2">
+        <Button variant="outline" size="sm" onClick={onSync} className="rounded-xl">
+          Sync calendar
+        </Button>
+        <Button size="sm" onClick={onCreate} className="rounded-xl">
+          Add event
         </Button>
       </div>
-
-      <div className="flex flex-col gap-2 border-b border-border pb-4 text-sm">
-        <span className="text-muted-foreground">
-          {formatEventRange(event.start, event.end)}
-        </span>
-        {event.location ? (
-          <span className="text-foreground">{event.location}</span>
-        ) : null}
-        {event.status ? (
-          <span className="text-muted-foreground capitalize">Status: {event.status}</span>
-        ) : null}
-      </div>
-
-      {event.attendees && event.attendees.length > 0 ? (
-        <div className="flex flex-col gap-1 text-sm">
-          <span className="font-medium text-foreground">Attendees</span>
-          <ul className="list-inside list-disc text-muted-foreground">
-            {event.attendees.map((attendee, index) => (
-              <li key={attendee.email ?? index}>
-                {attendee.displayName ? `${attendee.displayName} (${attendee.email})` : attendee.email}
-              </li>
-            ))}
-          </ul>
-        </div>
-      ) : null}
-
-      {event.description ? (
-        <pre className="whitespace-pre-wrap break-words font-sans text-sm leading-relaxed text-foreground/90">
-          {event.description}
-        </pre>
-      ) : null}
-
-      {event.htmlLink ? (
-        <a
-          href={event.htmlLink}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-sm text-primary underline-offset-4 hover:underline"
-        >
-          Open in Google Calendar
-        </a>
-      ) : null}
     </div>
   )
 }
 
-function CalendarStatusSkeleton() {
+function CalendarPageSkeleton() {
   return (
     <div className="flex h-[calc(100vh-var(--header-height))] flex-col">
-      <div className="flex items-center justify-between gap-4 border-b border-border px-6 py-4">
-        <Skeleton className="h-7 w-28" />
-        <div className="flex items-center gap-2">
-          <Skeleton className="h-8 w-20" />
-          <Skeleton className="h-8 w-24" />
-        </div>
+      <div className="space-y-3 border-b border-border/60 px-6 py-5">
+        <Skeleton className="h-8 w-40" />
+        <Skeleton className="h-4 w-32" />
+        <Skeleton className="h-9 w-full max-w-sm rounded-full" />
       </div>
-      <div className="flex min-h-0 flex-1">
-        <div className="flex w-full max-w-sm flex-col border-r border-border">
-          <div className="border-b border-border p-3">
-            <Skeleton className="h-9 w-full rounded-md" />
-          </div>
-          <div className="flex flex-col gap-2 p-3">
-            {Array.from({ length: 6 }).map((_, index) => (
-              <Skeleton key={index} className="h-16 w-full rounded-lg" />
-            ))}
-          </div>
-        </div>
-        <div className="min-w-0 flex-1 p-8">
-          <Skeleton className="h-8 w-2/3" />
-          <Skeleton className="mt-4 h-4 w-1/3" />
-          <Skeleton className="mt-8 h-32 w-full" />
-        </div>
-      </div>
+      <CalendarGridSkeleton view="month" />
     </div>
   )
 }
 
-function EmptyList({ isSearching }: { isSearching: boolean }) {
-  return (
-    <div className="flex flex-col items-center justify-center gap-2 px-6 py-16 text-center">
-      <HugeiconsIcon icon={Calendar03Icon} strokeWidth={2} className="size-8 text-muted-foreground" />
-      <p className="text-sm font-medium text-foreground">
-        {isSearching ? "No matching events" : "No events yet"}
-      </p>
-      <p className="text-xs text-muted-foreground">
-        {isSearching ? "Try a different search." : "Hit Sync to pull events from Google Calendar."}
-      </p>
-    </div>
-  )
-}
+function CalendarGridSkeleton({ view }: { view: CalendarView }) {
+  if (view === "month") {
+    return (
+      <div className="grid min-h-0 flex-1 grid-cols-7 gap-px bg-border/30 p-px">
+        {Array.from({ length: 35 }).map((_, index) => (
+          <Skeleton key={index} className="min-h-[5.5rem] rounded-none bg-background" />
+        ))}
+      </div>
+    )
+  }
 
-function EmptyDetail() {
   return (
-    <div className="flex h-full flex-col items-center justify-center gap-2 text-center">
-      <HugeiconsIcon
-        icon={Calendar03Icon}
-        strokeWidth={2}
-        className="size-10 text-muted-foreground/50"
-      />
-      <p className="text-sm text-muted-foreground">Select an event to view details</p>
+    <div className="flex min-h-0 flex-1 flex-col gap-3 p-6">
+      <div className="grid grid-cols-7 gap-2">
+        {Array.from({ length: 7 }).map((_, index) => (
+          <Skeleton key={index} className="h-16 rounded-2xl" />
+        ))}
+      </div>
+      <Skeleton className="min-h-0 flex-1 rounded-2xl" />
     </div>
   )
 }

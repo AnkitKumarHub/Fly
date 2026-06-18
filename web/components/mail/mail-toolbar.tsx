@@ -60,9 +60,9 @@ export function MailToolbar({
         ) : null}
 
         <div className="min-w-0 shrink-0">
-          <h1 className="text-xl font-semibold tracking-tight text-foreground">{title}</h1>
+          <h1 className="text-xl font-semibold tracking-tight text-foreground/85">{title}</h1>
           {activeFolder === "inbox" && unreadCount > 0 && !isSearching ? (
-            <p className="text-xs text-muted-foreground">{unreadCount} unread</p>
+            <p className="text-xs text-muted-foreground/80">{unreadCount} unread</p>
           ) : null}
         </div>
 
@@ -137,8 +137,8 @@ export function MailToolbar({
               className={cn(
                 "shrink-0 rounded-full border px-3.5 py-1 text-sm font-medium transition-colors",
                 activeFolder === id
-                  ? "border-border bg-muted text-foreground"
-                  : "border-transparent text-muted-foreground hover:border-border/60 hover:bg-muted/40 hover:text-foreground",
+                  ? "border-border/60 bg-muted/50 text-foreground/85"
+                  : "border-transparent text-muted-foreground/75 hover:border-border/40 hover:bg-muted/25 hover:text-foreground/70",
               )}
             >
               {label}

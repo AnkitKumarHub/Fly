@@ -31,11 +31,11 @@ export function MailRow({ email, active, reducedMotion, onSelect }: MailRowProps
         aria-current={active ? "true" : undefined}
         className={cn(
           "w-full rounded-xl px-3 py-3 text-left transition-colors",
-          active ? "bg-muted/80" : "hover:bg-muted/40",
+          active ? "bg-muted/60" : "hover:bg-muted/30",
         )}
       >
         <span className="flex items-start gap-3">
-          <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-muted text-[11px] font-medium text-muted-foreground">
+          <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-muted/80 text-[11px] font-medium text-muted-foreground/90">
             {getInitials(sender)}
           </span>
 
@@ -44,14 +44,16 @@ export function MailRow({ email, active, reducedMotion, onSelect }: MailRowProps
               <span className="flex min-w-0 items-center gap-1.5">
                 {isUnread ? (
                   <span
-                    className="size-1.5 shrink-0 rounded-full bg-foreground/50"
+                    className="size-1.5 shrink-0 rounded-full bg-foreground/35"
                     aria-hidden
                   />
                 ) : null}
                 <span
                   className={cn(
                     "truncate text-sm",
-                    isUnread ? "font-semibold text-foreground" : "font-medium text-foreground/80",
+                    isUnread
+                      ? "font-medium text-foreground/90"
+                      : "font-normal text-foreground/65",
                   )}
                 >
                   {sender}
@@ -62,10 +64,10 @@ export function MailRow({ email, active, reducedMotion, onSelect }: MailRowProps
                   <HugeiconsIcon
                     icon={StarIcon}
                     strokeWidth={2}
-                    className="size-3 text-muted-foreground"
+                    className="size-3 text-muted-foreground/70"
                   />
                 ) : null}
-                <span className="text-xs tabular-nums text-muted-foreground">
+                <span className="text-xs tabular-nums text-muted-foreground/70">
                   {formatDate(email.internalDate)}
                 </span>
               </span>
@@ -74,14 +76,16 @@ export function MailRow({ email, active, reducedMotion, onSelect }: MailRowProps
             <span
               className={cn(
                 "mt-0.5 block truncate text-sm",
-                isUnread ? "font-medium text-foreground" : "text-foreground/75",
+                isUnread ? "font-normal text-foreground/80" : "font-normal text-foreground/55",
               )}
             >
               {subject}
             </span>
 
             {snippet ? (
-              <span className="mt-0.5 line-clamp-1 text-sm text-muted-foreground">{snippet}</span>
+              <span className="mt-0.5 line-clamp-1 text-sm text-muted-foreground/65">
+                {snippet}
+              </span>
             ) : null}
           </span>
         </span>

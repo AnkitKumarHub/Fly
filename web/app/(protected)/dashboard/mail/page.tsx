@@ -16,6 +16,7 @@ import {
   isIntegrationNotConnectedError,
 } from "@/components/integration-reconnect-banner"
 import { MailDetail } from "@/components/mail/mail-detail"
+import { MailEmptyState } from "@/components/mail/mail-empty-state"
 import { MailList } from "@/components/mail/mail-list"
 import { MailPanels } from "@/components/mail/mail-panels"
 import { MailToolbar } from "@/components/mail/mail-toolbar"
@@ -124,6 +125,11 @@ export default function MailPage() {
     setSelectedId(null)
   }
 
+  function handleClearSearch() {
+    setSearch("")
+    setActiveQuery("")
+  }
+
   if (isStatusLoading) {
     return <MailStatusSkeleton />
   }
@@ -141,19 +147,17 @@ export default function MailPage() {
     )
   }
 
+  const isListEmpty = !isLoading && visibleEmails.length === 0
+
   const listPanel = (
     <div className="flex min-h-0 flex-1 flex-col">
       <MailList
         emails={visibleEmails}
         selectedId={selectedId}
         isLoading={isLoading}
-        isSearching={isSearching}
-        folderLabel={folderLabel}
         listKey={listKey}
         reducedMotion={reducedMotion}
         onSelect={handleSelectEmail}
-        onSync={handleSync}
-        onCompose={() => setComposeOpen(true)}
       />
     </div>
   )
@@ -191,12 +195,24 @@ export default function MailPage() {
         </div>
       ) : null}
 
-      <MailPanels
-        mobileView={mobileView}
-        reducedMotion={reducedMotion}
-        listPanel={listPanel}
-        detailPanel={detailPanel}
-      />
+      {isListEmpty ? (
+        <MailEmptyState
+          folder={activeFolder}
+          folderLabel={folderLabel}
+          isSearching={isSearching}
+          reducedMotion={reducedMotion}
+          onSync={handleSync}
+          onCompose={() => setComposeOpen(true)}
+          onClearSearch={handleClearSearch}
+        />
+      ) : (
+        <MailPanels
+          mobileView={mobileView}
+          reducedMotion={reducedMotion}
+          listPanel={listPanel}
+          detailPanel={detailPanel}
+        />
+      )}
 
       <ComposeSheet open={composeOpen} onOpenChange={setComposeOpen} />
     </div>
