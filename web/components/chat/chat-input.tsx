@@ -13,6 +13,7 @@ interface ChatInputProps {
   disabled?: boolean
   isStreaming?: boolean
   reducedMotion?: boolean
+  variant?: "default" | "panel"
 }
 
 export function ChatInput({
@@ -20,6 +21,7 @@ export function ChatInput({
   disabled,
   isStreaming,
   reducedMotion = false,
+  variant = "default",
 }: ChatInputProps) {
   const [value, setValue] = useState("")
   const [focused, setFocused] = useState(false)
@@ -52,16 +54,21 @@ export function ChatInput({
   const canSend = value.trim().length > 0 && !disabled && !isStreaming
   const charsLeft = AGENT_UI.MAX_MESSAGE_LENGTH - value.length
   const nearLimit = charsLeft < 200
+  const isPanel = variant === "panel"
 
   return (
-    <div className="shrink-0 px-5 pb-5 pt-2 md:px-8 md:pb-6">
-      <div className="mx-auto w-full max-w-2xl">
+    <div
+      className={cn(
+        "shrink-0",
+        isPanel ? "border-t border-border/50 px-6 py-4 md:px-8" : "px-5 pb-5 pt-2 md:px-8 md:pb-6",
+      )}
+    >
+      <div className={cn("mx-auto w-full", isPanel ? "max-w-xl" : "max-w-2xl")}>
         <div
           className={cn(
-            "flex items-end gap-2 rounded-2xl border bg-card/60 px-4 py-3 backdrop-blur-sm transition-all duration-200",
-            focused
-              ? "border-primary/30 ring-2 ring-primary/10"
-              : "border-border/50",
+            "flex items-end gap-2 rounded-xl border px-3 py-2.5 transition-colors duration-150",
+            isPanel ? "bg-muted/25" : "bg-card/60 backdrop-blur-sm",
+            focused ? "border-border ring-1 ring-ring/20" : "border-border/60",
             (disabled || isStreaming) && "opacity-60",
           )}
         >
@@ -76,8 +83,8 @@ export function ChatInput({
             disabled={disabled || isStreaming}
             placeholder={isStreaming ? "Fly is responding…" : "Ask Fly…"}
             className={cn(
-              "flex-1 resize-none bg-transparent text-sm text-foreground placeholder:text-muted-foreground/55",
-              "border-none outline-none focus:ring-0 leading-relaxed py-0.5",
+              "flex-1 resize-none bg-transparent text-sm text-foreground placeholder:text-muted-foreground",
+              "border-none outline-none focus:ring-0 leading-relaxed py-1",
               "disabled:cursor-not-allowed",
             )}
             style={{ minHeight: "24px", maxHeight: "120px" }}
@@ -103,24 +110,26 @@ export function ChatInput({
               whileTap={reducedMotion || !canSend ? undefined : sendButtonTap}
               transition={chatTransition(reducedMotion, 0.12)}
               className={cn(
-                "flex size-9 items-center justify-center rounded-xl transition-all duration-200",
+                "flex size-8 items-center justify-center rounded-lg transition-colors duration-150",
                 canSend
-                  ? "bg-primary text-primary-foreground shadow-sm hover:bg-primary/90"
-                  : "bg-muted/80 text-muted-foreground/45 cursor-not-allowed",
+                  ? "bg-foreground text-background hover:bg-foreground/90"
+                  : "bg-muted text-muted-foreground/50 cursor-not-allowed",
               )}
             >
               {isStreaming ? (
                 <span className="size-3.5 animate-spin rounded-full border-2 border-current/25 border-t-current" />
               ) : (
-                <HugeiconsIcon icon={ArrowUp01Icon} strokeWidth={2.5} className="size-4" />
+                <HugeiconsIcon icon={ArrowUp01Icon} strokeWidth={2.5} className="size-3.5" />
               )}
             </motion.button>
           </div>
         </div>
 
-        <p className="mt-2 text-center text-[11px] text-muted-foreground/45">
-          Enter to send · Shift+Enter for new line
-        </p>
+        {!isPanel ? (
+          <p className="mt-2 text-center text-[11px] text-muted-foreground/60">
+            Enter to send · Shift+Enter for new line
+          </p>
+        ) : null}
       </div>
     </div>
   )

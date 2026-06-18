@@ -14,7 +14,7 @@ export default function ChatPage() {
   const hasMessages = messages.length > 0
 
   return (
-    <div className="flex h-[calc(100vh-var(--header-height))] min-h-0 flex-col overflow-hidden bg-background">
+    <div className="flex h-[calc(100vh-var(--header-height))] min-h-0 flex-col overflow-hidden bg-muted/20">
       <ChatHeader
         hasMessages={hasMessages}
         isStreaming={isStreaming}
@@ -24,25 +24,37 @@ export default function ChatPage() {
 
       <div className="flex min-h-0 flex-1 flex-col">
         {!hasMessages ? (
-          <ChatWelcome
-            onPromptClick={send}
-            disabled={isStreaming}
-            reducedMotion={reducedMotion}
-          />
+          <div className="flex flex-1 flex-col items-center justify-center p-4 md:p-6">
+            <div className="flex h-full w-full max-w-3xl flex-col overflow-hidden rounded-2xl border border-border/60 bg-card shadow-sm">
+              <ChatWelcome
+                onPromptClick={send}
+                disabled={isStreaming}
+                reducedMotion={reducedMotion}
+              />
+              <ChatInput
+                onSend={send}
+                disabled={false}
+                isStreaming={isStreaming}
+                reducedMotion={reducedMotion}
+                variant="panel"
+              />
+            </div>
+          </div>
         ) : (
-          <ChatMessageList
-            messages={messages}
-            isStreaming={isStreaming}
-            reducedMotion={reducedMotion}
-          />
+          <>
+            <ChatMessageList
+              messages={messages}
+              isStreaming={isStreaming}
+              reducedMotion={reducedMotion}
+            />
+            <ChatInput
+              onSend={send}
+              disabled={false}
+              isStreaming={isStreaming}
+              reducedMotion={reducedMotion}
+            />
+          </>
         )}
-
-        <ChatInput
-          onSend={send}
-          disabled={false}
-          isStreaming={isStreaming}
-          reducedMotion={reducedMotion}
-        />
       </div>
     </div>
   )

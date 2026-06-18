@@ -81,7 +81,6 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
-  --chat-glow: oklch(0.72 0.06 242 / 0.12);
 }
 
 .dark {
@@ -116,7 +115,6 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 14%);
   --sidebar-ring: oklch(0.556 0 0);
-  --chat-glow: oklch(0.55 0.08 242 / 0.18);
 }
 
 @layer utilities {
