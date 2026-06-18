@@ -31,19 +31,27 @@ integrationsRouter.get("/connect", restrictToAuthenticatedUser(), async (req, re
     return res.status(400).json({ success: false, message: "plugin query param is required" });
   }
 
-  const { url, state } = await generateOAuthUrl(corsair, plugin, {
-    tenantId: req.user!.id,
-    redirectUri: REDIRECT_URI,
-  });
+  try {
+    const { url, state } = await generateOAuthUrl(corsair, plugin, {
+      tenantId: req.user!.id,
+      redirectUri: REDIRECT_URI,
+    });
 
-  res.cookie("oauth_state", state, {
-    httpOnly: true,
-    sameSite: "lax",
-    secure: env.cookieSecure,
-    maxAge: 10 * 60 * 1000,
-  });
+    res.cookie("oauth_state", state, {
+      httpOnly: true,
+      sameSite: "lax",
+      secure: env.cookieSecure,
+      maxAge: 10 * 60 * 1000,
+    });
 
-  return res.redirect(url);
+    return res.redirect(url);
+  } catch (error) {
+    console.error("integrations.connect.failed:", error);
+    return res.status(500).json({
+      success: false,
+      message: error instanceof Error ? error.message : "Failed to start integration OAuth",
+    });
+  }
 });
 
 /**
