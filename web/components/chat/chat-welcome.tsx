@@ -1,14 +1,23 @@
 "use client"
 
+import { motion } from "motion/react"
 import { HugeiconsIcon } from "@hugeicons/react"
 import {
   Mail01Icon,
   Calendar03Icon,
   PencilEdit01Icon,
   Add01Icon,
+  SparklesIcon,
 } from "@hugeicons/core-free-icons"
 import { QUICK_PROMPTS } from "@/lib/agent-config"
 import { cn } from "@/lib/utils"
+import {
+  chatDuration,
+  chatTransition,
+  promptContainerVariants,
+  promptItemVariants,
+  welcomeIconVariants,
+} from "./chat-motion"
 
 const ICON_MAP = {
   mail: Mail01Icon,
@@ -18,62 +27,89 @@ const ICON_MAP = {
 }
 
 interface ChatWelcomeProps {
-  firstName: string
   onPromptClick: (prompt: string) => void
   disabled?: boolean
+  reducedMotion: boolean
 }
 
-export function ChatWelcome({ firstName, onPromptClick, disabled }: ChatWelcomeProps) {
+export function ChatWelcome({ onPromptClick, disabled, reducedMotion }: ChatWelcomeProps) {
   return (
-    <div className="flex flex-1 flex-col items-center justify-center px-4 py-16 gap-10 animate-in fade-in slide-in-from-bottom-4 duration-500">
-      {/* Greeting */}
-      <div className="text-center space-y-2 max-w-lg">
-        <h1 className="text-3xl font-semibold tracking-tight">
-          Hey, {firstName}{" "}
-          <span
-            className="inline-block animate-[wave_2s_ease-in-out_1]"
-            style={{ transformOrigin: "70% 70%" }}
-          >
-            👋
-          </span>
-        </h1>
-        <p className="text-muted-foreground text-base">
+    <div className="flex flex-1 flex-col items-center justify-center px-4 py-10 md:px-8 md:py-14">
+      {/* Sparkle + greeting */}
+      <motion.div
+        initial={reducedMotion ? false : "initial"}
+        animate="animate"
+        variants={welcomeIconVariants}
+        className="mb-5 flex flex-col items-center gap-4"
+      >
+        <motion.div
+          animate={
+            reducedMotion
+              ? undefined
+              : {
+                  opacity: [0.35, 0.55, 0.35],
+                  scale: [1, 1.04, 1],
+                }
+          }
+          transition={
+            reducedMotion
+              ? undefined
+              : {
+                  duration: chatDuration.breathe,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                }
+          }
+          className="flex size-14 items-center justify-center rounded-2xl bg-muted/40 text-muted-foreground/50"
+        >
+          <HugeiconsIcon icon={SparklesIcon} strokeWidth={1.5} className="size-7" />
+        </motion.div>
+
+        <p className="text-center text-[15px] text-muted-foreground/80">
           How can I help you today?
         </p>
-      </div>
+      </motion.div>
 
-      {/* Quick Prompt Grid */}
-      <div className="grid grid-cols-2 gap-3 w-full max-w-lg">
+      {/* Suggestion cards */}
+      <motion.div
+        initial={reducedMotion ? false : "hidden"}
+        animate="show"
+        variants={promptContainerVariants}
+        className="grid w-full max-w-xl grid-cols-1 gap-2.5 sm:grid-cols-2 sm:gap-3"
+      >
         {QUICK_PROMPTS.map((p) => {
           const Icon = ICON_MAP[p.icon]
           return (
-            <button
+            <motion.button
               key={p.id}
+              type="button"
+              variants={promptItemVariants}
+              initial={reducedMotion ? false : "hidden"}
+              animate="show"
+              whileHover={reducedMotion ? undefined : { y: -2 }}
+              whileTap={reducedMotion ? undefined : { scale: 0.985 }}
+              transition={chatTransition(reducedMotion, chatDuration.normal)}
               onClick={() => onPromptClick(p.prompt)}
               disabled={disabled}
               className={cn(
-                "group flex items-start gap-3 rounded-xl border border-border bg-card/60 p-4 text-left",
-                "transition-all duration-200 hover:bg-card hover:border-primary/40 hover:shadow-sm",
-                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary",
-                "disabled:opacity-50 disabled:cursor-not-allowed",
+                "group flex items-center gap-3 rounded-xl border border-border/60 bg-background/50 px-4 py-3.5 text-left",
+                "transition-colors duration-200 hover:border-border hover:bg-muted/30",
+                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/30",
+                "disabled:pointer-events-none disabled:opacity-50",
               )}
             >
-              <div className="shrink-0 mt-0.5 size-8 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
-                <HugeiconsIcon icon={Icon} strokeWidth={2} className="size-4 text-primary" />
+              <div className="flex w-full items-center gap-3">
+                <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-muted/50 text-muted-foreground transition-colors group-hover:bg-muted/80 group-hover:text-foreground/70">
+                  <HugeiconsIcon icon={Icon} strokeWidth={2} className="size-3.5" />
+                </div>
+                <span className="text-[13px] leading-snug text-foreground/75 group-hover:text-foreground/90">
+                  {p.label}
+                </span>
               </div>
-              <div className="min-w-0">
-                <p className="text-sm font-medium text-foreground leading-snug">{p.label}</p>
-                <p className="text-xs text-muted-foreground mt-0.5">{p.description}</p>
-              </div>
-            </button>
+            </motion.button>
           )
         })}
-      </div>
-
-      {/* Hint */}
-      <p className="text-xs text-muted-foreground/60 text-center">
-        You have {5} AI requests per day · connects to your Gmail &amp; Calendar
-      </p>
+      </motion.div>
     </div>
   )
 }

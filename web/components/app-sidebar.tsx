@@ -30,7 +30,7 @@ const data = {
       ),
     },
     {
-      title: "Fly",
+      title: "Ask Fly",
       url: "/dashboard/chat",
       icon: (
         <HugeiconsIcon icon={AiChat02Icon} strokeWidth={2} />

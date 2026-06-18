@@ -7,7 +7,7 @@ import { SidebarTrigger } from "@/components/ui/sidebar"
 
 const PAGE_TITLES: Record<string, string> = {
   "/dashboard": "Dashboard",
-  "/dashboard/chat": "Fly",
+  "/dashboard/chat": "Ask Fly",
   "/dashboard/mail": "Mail",
   "/dashboard/calendar": "Calendar",
   "/dashboard/integrations": "Integrations",

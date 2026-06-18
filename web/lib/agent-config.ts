@@ -16,38 +16,34 @@ export const AGENT_UI = {
 
   /** Backend streaming endpoint */
   CHAT_ENDPOINT: "/agent/chat",
-} as const;
+} as const
 
 /** The 4 quick-action prompts shown on the welcome screen */
 export const QUICK_PROMPTS = [
   {
-    id: "unread-emails",
-    label: "Show my unread emails",
-    description: "See your latest inbox",
-    prompt: "Show me my latest unread emails",
-    icon: "mail",
-  },
-  {
-    id: "schedule-today",
-    label: "What's on today?",
-    description: "Check your calendar",
+    id: "calendar-today",
+    label: "What's on my calendar today?",
     prompt: "What events do I have on my calendar today?",
     icon: "calendar",
   },
   {
-    id: "draft-email",
-    label: "Draft an email",
-    description: "Write & send a message",
-    prompt: "Help me draft and send an email",
+    id: "unread-emails",
+    label: "Summarize my most important unread emails.",
+    prompt: "Summarize my most important unread emails",
+    icon: "mail",
+  },
+  {
+    id: "draft-reply",
+    label: "Draft a reply to my latest email.",
+    prompt: "Help me draft a reply to my latest email",
     icon: "compose",
   },
   {
     id: "schedule-meeting",
-    label: "Schedule a meeting",
-    description: "Create a calendar event",
-    prompt: "Help me create a new calendar event",
+    label: "Schedule a 30-minute meeting tomorrow.",
+    prompt: "Help me schedule a 30-minute meeting tomorrow",
     icon: "event",
   },
-] as const;
+] as const
 
-export type QuickPromptId = (typeof QUICK_PROMPTS)[number]["id"];
+export type QuickPromptId = (typeof QUICK_PROMPTS)[number]["id"]

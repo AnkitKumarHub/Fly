@@ -7,35 +7,38 @@ import type { ChatMessage } from "@/hooks/use-agent-chat"
 interface ChatMessageListProps {
   messages: ChatMessage[]
   isStreaming: boolean
+  reducedMotion?: boolean
 }
 
 export function ChatMessageList({
   messages,
   isStreaming,
+  reducedMotion = false,
 }: ChatMessageListProps) {
   const bottomRef = useRef<HTMLDivElement>(null)
 
-  // Auto-scroll to bottom whenever messages update or streaming produces new content
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" })
-  }, [messages, isStreaming])
+    bottomRef.current?.scrollIntoView({ behavior: reducedMotion ? "auto" : "smooth" })
+  }, [messages, isStreaming, reducedMotion])
 
   return (
-    <div className="flex-1 overflow-y-auto px-4 py-6 space-y-4">
-      {messages.map((msg, i) => {
-        const isLastAssistant =
-          msg.role === "assistant" && i === messages.length - 1
+    <div className="flex-1 overflow-y-auto px-4 py-5 md:px-6 md:py-6">
+      <div className="mx-auto flex max-w-2xl flex-col gap-5">
+        {messages.map((msg, i) => {
+          const isLastAssistant = msg.role === "assistant" && i === messages.length - 1
 
-        return (
-          <ChatMessageBubble
-            key={msg.id}
-            message={msg}
-            isLastAssistant={isLastAssistant}
-            isStreaming={isStreaming}
-          />
-        )
-      })}
-      <div ref={bottomRef} />
+          return (
+            <ChatMessageBubble
+              key={msg.id}
+              message={msg}
+              isLastAssistant={isLastAssistant}
+              isStreaming={isStreaming}
+              reducedMotion={reducedMotion}
+            />
+          )
+        })}
+        <div ref={bottomRef} />
+      </div>
     </div>
   )
 }
