@@ -3,6 +3,7 @@ import { restrictToAuthenticatedUser } from "../../middleware/auth-middleware.js
 import { aiAccessGuard } from "../../middleware/ai-access-guard.js";
 import { createUserRateLimitMiddleware } from "../../middleware/rate-limit.js";
 import { handleAgentChat } from "./controller.js";
+import { handleCommandConfirm, handleCommandResolve } from "./command-controller.js";
 import { AGENT_LIMITS } from "./config.js";
 
 export const agentRouter: RouterType = Router();
@@ -28,4 +29,27 @@ agentRouter.post(
     namespace: "agent.chat.minute",
   }),
   handleAgentChat,
+);
+
+agentRouter.post(
+  "/command/resolve",
+  restrictToAuthenticatedUser(),
+  aiAccessGuard(),
+  createUserRateLimitMiddleware({
+    max: AGENT_LIMITS.BURST_RATE_PER_MINUTE,
+    windowMs: 60_000,
+    namespace: "agent.command.resolve.minute",
+  }),
+  handleCommandResolve,
+);
+
+agentRouter.post(
+  "/command/confirm",
+  restrictToAuthenticatedUser(),
+  createUserRateLimitMiddleware({
+    max: AGENT_LIMITS.BURST_RATE_PER_MINUTE,
+    windowMs: 60_000,
+    namespace: "agent.command.confirm.minute",
+  }),
+  handleCommandConfirm,
 );

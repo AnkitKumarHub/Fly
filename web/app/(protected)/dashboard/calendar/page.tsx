@@ -2,6 +2,7 @@
 
 import Link from "next/link"
 import { useEffect, useState } from "react"
+import { useSearchParams } from "next/navigation"
 import { toast } from "sonner"
 import { AnimatePresence, motion, useReducedMotion } from "motion/react"
 import { HugeiconsIcon } from "@hugeicons/react"
@@ -41,6 +42,7 @@ import {
 } from "@/hooks/use-events"
 
 export default function CalendarPage() {
+  const searchParams = useSearchParams()
   const reducedMotion = useReducedMotion() ?? false
 
   const [view, setView] = useState<CalendarView>("month")
@@ -66,6 +68,20 @@ export default function CalendarPage() {
 
   const visibleEvents = isSearching ? filterEventsByQuery(events, activeQuery) : events
   const title = getCalendarTitle(view, focusDate)
+
+  useEffect(() => {
+    const selected = searchParams.get("selected")
+    const requestedView = searchParams.get("view")
+
+    if (selected) {
+      setSelectedId(selected)
+      setDetailOpen(true)
+    }
+
+    if (requestedView === "day" || requestedView === "week" || requestedView === "month") {
+      setView(requestedView)
+    }
+  }, [searchParams])
 
   function handleSearchSubmit(event: React.FormEvent) {
     event.preventDefault()
@@ -143,6 +159,18 @@ export default function CalendarPage() {
     }
     return undefined
   }, [detailOpen])
+
+  useEffect(() => {
+    if (!selectedEvent?.start) return
+
+    const dateTime = selectedEvent.start.dateTime ?? selectedEvent.start.date
+    if (!dateTime) return
+
+    const parsed = new Date(dateTime)
+    if (Number.isNaN(parsed.getTime())) return
+
+    setFocusDate(parsed)
+  }, [selectedEvent])
 
   if (isStatusLoading) {
     return <CalendarPageSkeleton />

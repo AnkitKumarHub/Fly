@@ -1,7 +1,8 @@
 "use client"
 
 import Link from "next/link"
-import { useState } from "react"
+import { useEffect, useState } from "react"
+import { useSearchParams } from "next/navigation"
 import { toast } from "sonner"
 import { useQueryClient } from "@tanstack/react-query"
 import { useReducedMotion } from "motion/react"
@@ -36,6 +37,7 @@ import {
 } from "@/hooks/use-emails"
 
 export default function MailPage() {
+  const searchParams = useSearchParams()
   const queryClient = useQueryClient()
   const reducedMotion = useReducedMotion() ?? false
   const isMobile = useIsMobile()
@@ -66,6 +68,20 @@ export default function MailPage() {
   const folderLabel = isSearching ? "Search results" : getFolderLabel(activeFolder)
   const listKey = `${activeFolder}-${isSearching ? activeQuery : "all"}`
   const mobileView = isMobile && selectedId ? "detail" : "list"
+
+  useEffect(() => {
+    const query = searchParams.get("q")
+    const selected = searchParams.get("selected")
+
+    if (query !== null) {
+      setSearch(query)
+      setActiveQuery(query)
+    }
+
+    if (selected !== null) {
+      setSelectedId(selected)
+    }
+  }, [searchParams])
 
   function markEmailRead(emailId: string) {
     queryClient.setQueriesData<EmailListItem[]>({ queryKey: ["emails", "list"] }, (current) =>

@@ -1,10 +1,18 @@
 import { pool } from "../../db/index.js";
 
 export type AuditAction =
+  | "command_blocked"
+  | "command_needs_input"
   | "search_emails"
+  | "draft_email"
+  | "send_email"
   | "list_events"
+  | "create_event"
+  | "create_event_and_send_email"
+  | "propose_draft_email"
   | "propose_send_email"
   | "propose_create_event"
+  | "propose_create_event_and_send_email"
   | "propose_update_event"
   | "input_blocked"
   | "stream_error";
