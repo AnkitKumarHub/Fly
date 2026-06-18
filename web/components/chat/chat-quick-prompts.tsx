@@ -10,6 +10,7 @@ import {
 } from "@hugeicons/core-free-icons"
 import { QUICK_PROMPTS } from "@/lib/agent-config"
 import { cn } from "@/lib/utils"
+import { PROMPT_ACCENTS } from "@/components/chat/chat-tokens"
 import {
   chatDuration,
   chatTransition,
@@ -40,10 +41,11 @@ export function ChatQuickPrompts({
       initial={reducedMotion ? false : "hidden"}
       animate="show"
       variants={promptContainerVariants}
-      className="grid grid-cols-1 gap-2 sm:grid-cols-2"
+      className="no-scrollbar flex flex-wrap justify-center gap-2 overflow-x-auto px-1 pb-1"
     >
       {QUICK_PROMPTS.map((p) => {
         const Icon = ICON_MAP[p.icon]
+        const accent = PROMPT_ACCENTS[p.accent]
 
         return (
           <motion.button
@@ -53,21 +55,22 @@ export function ChatQuickPrompts({
             initial={reducedMotion ? false : "hidden"}
             animate="show"
             whileHover={reducedMotion ? undefined : { y: -1 }}
-            whileTap={reducedMotion ? undefined : { scale: 0.99 }}
+            whileTap={reducedMotion ? undefined : { scale: 0.98 }}
             transition={chatTransition(reducedMotion, chatDuration.fast)}
             onClick={() => onPromptClick(p.prompt)}
             disabled={disabled}
             className={cn(
-              "group flex items-center gap-3 rounded-xl border border-border/60 bg-background px-4 py-3.5 text-left",
-              "transition-colors duration-150 hover:border-border hover:bg-muted/30",
+              "inline-flex shrink-0 items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium",
+              "transition-shadow duration-150 hover:shadow-sm",
               "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40",
               "disabled:pointer-events-none disabled:opacity-50",
+              accent.bg,
+              accent.text,
+              accent.border,
             )}
           >
-            <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-muted/60 text-muted-foreground transition-colors group-hover:bg-muted group-hover:text-foreground">
-              <HugeiconsIcon icon={Icon} strokeWidth={2} className="size-4" />
-            </span>
-            <span className="min-w-0 text-sm leading-snug text-foreground/90">{p.label}</span>
+            <HugeiconsIcon icon={Icon} strokeWidth={2} className="size-3.5 opacity-80" />
+            <span>{p.label}</span>
           </motion.button>
         )
       })}

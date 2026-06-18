@@ -20,7 +20,7 @@ export const promptContainerVariants: Variants = {
   hidden: { opacity: 0 },
   show: {
     opacity: 1,
-    transition: { staggerChildren: promptStagger, delayChildren: 0.08 },
+    transition: { staggerChildren: promptStagger, delayChildren: 0.05 },
   },
 }
 

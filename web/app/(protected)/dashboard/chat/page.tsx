@@ -6,6 +6,7 @@ import { ChatWelcome } from "@/components/chat/chat-welcome"
 import { ChatMessageList } from "@/components/chat/chat-message-list"
 import { ChatInput } from "@/components/chat/chat-input"
 import { ChatHeader } from "@/components/chat/chat-header"
+import { ChatQuickPrompts } from "@/components/chat/chat-quick-prompts"
 
 export default function ChatPage() {
   const reducedMotion = useReducedMotion() ?? false
@@ -14,7 +15,7 @@ export default function ChatPage() {
   const hasMessages = messages.length > 0
 
   return (
-    <div className="flex h-[calc(100vh-var(--header-height))] min-h-0 flex-col overflow-hidden bg-muted/20">
+    <div className="flex h-[calc(100vh-var(--header-height))] min-h-0 flex-col overflow-hidden bg-background">
       <ChatHeader
         hasMessages={hasMessages}
         isStreaming={isStreaming}
@@ -24,20 +25,24 @@ export default function ChatPage() {
 
       <div className="flex min-h-0 flex-1 flex-col">
         {!hasMessages ? (
-          <div className="flex flex-1 flex-col items-center justify-center p-4 md:p-6">
-            <div className="flex h-full w-full max-w-3xl flex-col overflow-hidden rounded-2xl border border-border/60 bg-card shadow-sm">
-              <ChatWelcome
-                onPromptClick={send}
-                disabled={isStreaming}
-                reducedMotion={reducedMotion}
-              />
-              <ChatInput
-                onSend={send}
-                disabled={false}
-                isStreaming={isStreaming}
-                reducedMotion={reducedMotion}
-                variant="panel"
-              />
+          <div className="chat-canvas relative flex flex-1 flex-col">
+            <div className="flex flex-1 flex-col items-center justify-center px-5 py-8 md:px-8">
+              <ChatWelcome reducedMotion={reducedMotion} />
+
+              <div className="relative mt-8 w-full max-w-2xl space-y-3">
+                <ChatInput
+                  onSend={send}
+                  disabled={false}
+                  isStreaming={isStreaming}
+                  reducedMotion={reducedMotion}
+                  variant="hero"
+                />
+                <ChatQuickPrompts
+                  onPromptClick={send}
+                  disabled={isStreaming}
+                  reducedMotion={reducedMotion}
+                />
+              </div>
             </div>
           </div>
         ) : (
