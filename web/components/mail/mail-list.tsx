@@ -42,9 +42,9 @@ export function MailList({
 }: MailListProps) {
   if (isLoading) {
     return (
-      <div className="flex flex-col gap-2 p-4">
+      <div className="no-scrollbar flex flex-1 flex-col gap-2 overflow-y-auto p-3">
         {Array.from({ length: 6 }).map((_, index) => (
-          <Skeleton key={index} className="h-14 w-full rounded-lg" />
+          <Skeleton key={index} className="h-[88px] w-full rounded-2xl" />
         ))}
       </div>
     )
@@ -68,7 +68,7 @@ export function MailList({
       initial={reducedMotion ? false : "hidden"}
       animate="show"
       variants={reducedMotion ? undefined : listContainerVariants}
-      className="flex-1 overflow-y-auto"
+      className="no-scrollbar flex flex-1 flex-col gap-2 overflow-y-auto p-3"
     >
       {emails.map((email) => (
         <MailRow
@@ -109,12 +109,12 @@ function MailEmptyList({
         {isSearching ? "No matching emails" : `${folderLabel} is empty`}
       </p>
       {!isSearching && onSync ? (
-        <Button variant="outline" size="sm" onClick={onSync}>
+        <Button variant="outline" size="sm" onClick={onSync} className="rounded-full">
           Sync inbox
         </Button>
       ) : null}
       {!isSearching && onCompose ? (
-        <Button size="sm" onClick={onCompose}>
+        <Button size="sm" onClick={onCompose} className="rounded-full">
           Compose
         </Button>
       ) : null}

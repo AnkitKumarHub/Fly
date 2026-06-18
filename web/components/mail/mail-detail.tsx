@@ -23,9 +23,9 @@ export function MailDetail({ email, emailId, isLoading, reducedMotion }: MailDet
   if (isLoading) {
     return (
       <div className="flex flex-col gap-3 px-8 py-10">
-        <Skeleton className="h-7 w-2/3" />
-        <Skeleton className="h-4 w-1/2" />
-        <Skeleton className="mt-6 h-64 w-full rounded-xl" />
+        <Skeleton className="h-7 w-2/3 rounded-lg" />
+        <Skeleton className="h-4 w-1/2 rounded-lg" />
+        <Skeleton className="mt-6 h-64 w-full rounded-2xl" />
       </div>
     )
   }
@@ -43,11 +43,11 @@ export function MailDetail({ email, emailId, isLoading, reducedMotion }: MailDet
         exit="exit"
         variants={reducedMotion ? undefined : detailVariants}
         transition={transition(reducedMotion, mailDuration.normal)}
-        className="mx-auto flex max-w-2xl flex-col gap-5 px-8 py-10"
+        className="mx-auto flex max-w-2xl flex-col gap-6 px-6 py-8 md:px-10 md:py-10"
       >
         <div className="space-y-2">
           <div className="flex items-start justify-between gap-3">
-            <h2 className="text-xl font-semibold tracking-tight text-foreground">
+            <h2 className="text-xl font-semibold tracking-tight text-foreground md:text-2xl">
               {email.subject || "(no subject)"}
             </h2>
             {isStarred ? (
@@ -65,16 +65,16 @@ export function MailDetail({ email, emailId, isLoading, reducedMotion }: MailDet
           </p>
         </div>
 
-        <div className="border-t border-border/40 pt-5">
+        <div className="rounded-2xl bg-muted/20 p-1">
           {email.bodyHtml ? (
             <iframe
               title="email-body"
               sandbox=""
-              className="min-h-[55vh] w-full rounded-xl border border-border/40 bg-card"
+              className="min-h-[55vh] w-full rounded-xl bg-card"
               srcDoc={email.bodyHtml}
             />
           ) : (
-            <pre className="whitespace-pre-wrap break-words font-sans text-sm leading-relaxed text-foreground/90">
+            <pre className="whitespace-pre-wrap break-words px-4 py-5 font-sans text-sm leading-relaxed text-foreground/90">
               {email.bodyText || email.snippet}
             </pre>
           )}
@@ -91,9 +91,11 @@ function MailEmptyDetail({ reducedMotion }: { reducedMotion: boolean }) {
       animate="animate"
       variants={reducedMotion ? undefined : emptyVariants}
       transition={transition(reducedMotion, mailDuration.empty)}
-      className="flex h-full flex-col items-center justify-center gap-2 px-6 text-center"
+      className="flex h-full flex-col items-center justify-center gap-3 px-6 text-center"
     >
-      <HugeiconsIcon icon={Mail01Icon} strokeWidth={2} className="size-9 text-muted-foreground/50" />
+      <span className="flex size-14 items-center justify-center rounded-2xl bg-muted/40">
+        <HugeiconsIcon icon={Mail01Icon} strokeWidth={2} className="size-6 text-muted-foreground/60" />
+      </span>
       <p className="text-sm text-muted-foreground">Select an email to read it</p>
     </motion.div>
   )

@@ -175,7 +175,7 @@ export default function MailPage() {
   )
 
   return (
-    <div className="flex h-[calc(100vh-var(--header-height))] flex-col">
+    <div className="flex h-[calc(100vh-var(--header-height))] flex-col overflow-hidden">
       <MailToolbar
         activeFolder={activeFolder}
         activeCategory={activeCategory}
@@ -196,7 +196,7 @@ export default function MailPage() {
       />
 
       {showReconnect ? (
-        <div className="border-b border-border/40 px-5 py-2.5">
+        <div className="shrink-0 px-5 py-2 md:px-6">
           <IntegrationReconnectBanner message="Reconnect Gmail on the integrations page to continue." />
         </div>
       ) : null}

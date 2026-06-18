@@ -20,11 +20,11 @@ export function MailPanels({
 }: MailPanelsProps) {
   return (
     <>
-      <div className="hidden min-h-0 flex-1 md:flex">
-        <div className="flex w-[360px] shrink-0 flex-col border-r border-border/40 bg-card/40">
+      <div className="hidden min-h-0 flex-1 overflow-hidden md:flex">
+        <div className="flex w-[min(100%,420px)] shrink-0 flex-col overflow-hidden">
           {listPanel}
         </div>
-        <div className="min-w-0 flex-1 overflow-y-auto">{detailPanel}</div>
+        <div className="no-scrollbar min-w-0 flex-1 overflow-y-auto">{detailPanel}</div>
       </div>
 
       <div className="relative min-h-0 flex-1 overflow-hidden md:hidden">
@@ -38,7 +38,7 @@ export function MailPanels({
               exit="exit"
               variants={reducedMotion ? undefined : panelSlideVariants}
               transition={transition(reducedMotion, mailDuration.normal)}
-              className="absolute inset-0 flex flex-col bg-card/40"
+              className="absolute inset-0 flex flex-col overflow-hidden"
             >
               {listPanel}
             </motion.div>
@@ -51,7 +51,7 @@ export function MailPanels({
               exit="exit"
               variants={reducedMotion ? undefined : panelSlideVariants}
               transition={transition(reducedMotion, mailDuration.normal)}
-              className="absolute inset-0 overflow-y-auto"
+              className="no-scrollbar absolute inset-0 overflow-y-auto"
             >
               {detailPanel}
             </motion.div>
