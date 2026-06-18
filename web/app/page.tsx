@@ -1,14 +1,37 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion, useScroll, useTransform } from "framer-motion";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { CommandIcon, Mail01Icon, Calendar01Icon, SparklesIcon, CheckmarkCircle01Icon, ZapIcon } from "@hugeicons/core-free-icons";
+import { FaGithub, FaSlack, FaGoogleDrive } from "react-icons/fa";
+import { SiGmail, SiGooglecalendar } from "react-icons/si";
 import Link from "next/link";
 
 export default function LandingPage() {
+  // Parallax scroll hooks
+  const { scrollY } = useScroll();
+  const y1 = useTransform(scrollY, [0, 1000], [0, -120]);
+  const y2 = useTransform(scrollY, [0, 1000], [0, -60]);
+  const y3 = useTransform(scrollY, [0, 1000], [0, -180]);
+  const y4 = useTransform(scrollY, [0, 1000], [0, -90]);
+  const y5 = useTransform(scrollY, [0, 1000], [0, -150]);
+
   const scrollVariant = {
     hidden: { opacity: 0, y: 30 },
     visible: { opacity: 1, y: 0, transition: { duration: 0.6 } }
+  };
+
+  const staggerContainer = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: { staggerChildren: 0.15 }
+    }
+  };
+
+  const staggerItem = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.5 } }
   };
 
   return (
@@ -52,48 +75,96 @@ export default function LandingPage() {
           </div>
         </header>
 
-        {/* Hero Section */}
-        <motion.section 
-          initial="hidden" 
-          animate="visible" 
-          variants={scrollVariant}
-          className="pt-24 pb-16 px-6 max-w-6xl mx-auto flex flex-col lg:flex-row items-center gap-16"
-        >
-          <div className="flex-1 space-y-8">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#141615] border border-white/10 text-xs font-medium text-[#BDCDD6]">
+        {/* Hero Section with Floating Integrations */}
+        <section className="relative pt-24 pb-16 px-6 max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-16 min-h-[85vh]">
+          {/* Floating Background Icons (Parallax) */}
+          <div className="absolute inset-0 pointer-events-none hidden md:block overflow-visible z-0">
+            <motion.div style={{ y: y1 }} className="absolute top-[10%] left-[5%] bg-[#141615] border border-white/10 p-3 rounded-2xl shadow-xl backdrop-blur-md">
+              <motion.div animate={{ y: [0, -10, 0] }} transition={{ repeat: Infinity, duration: 4, ease: "easeInOut" }}>
+                <SiGmail className="size-6 text-[#ea4335]" />
+              </motion.div>
+            </motion.div>
+            <motion.div style={{ y: y2 }} className="absolute top-[60%] left-[2%] bg-[#141615] border border-white/10 p-3 rounded-2xl shadow-xl backdrop-blur-md">
+              <motion.div animate={{ y: [0, -15, 0] }} transition={{ repeat: Infinity, duration: 5, ease: "easeInOut", delay: 1 }}>
+                <FaSlack className="size-6 text-[#E01E5A]" />
+              </motion.div>
+            </motion.div>
+            <motion.div style={{ y: y3 }} className="absolute top-[5%] right-[40%] bg-[#141615] border border-white/10 p-3 rounded-2xl shadow-xl backdrop-blur-md">
+              <motion.div animate={{ y: [0, -8, 0] }} transition={{ repeat: Infinity, duration: 3.5, ease: "easeInOut", delay: 0.5 }}>
+                <SiGooglecalendar className="size-6 text-[#4285F4]" />
+              </motion.div>
+            </motion.div>
+            <motion.div style={{ y: y4 }} className="absolute bottom-[10%] left-[45%] bg-[#141615] border border-white/10 p-3 rounded-2xl shadow-xl backdrop-blur-md">
+              <motion.div animate={{ y: [0, -12, 0] }} transition={{ repeat: Infinity, duration: 4.5, ease: "easeInOut", delay: 1.5 }}>
+                <FaGithub className="size-6 text-white" />
+              </motion.div>
+            </motion.div>
+            <motion.div style={{ y: y5 }} className="absolute top-[20%] right-[5%] bg-[#141615] border border-white/10 p-3 rounded-2xl shadow-xl backdrop-blur-md">
+              <motion.div animate={{ y: [0, -10, 0] }} transition={{ repeat: Infinity, duration: 4, ease: "easeInOut", delay: 2 }}>
+                <FaGoogleDrive className="size-6 text-[#FFBA00]" />
+              </motion.div>
+            </motion.div>
+          </div>
+
+          <motion.div 
+            initial="hidden" 
+            animate="visible" 
+            variants={scrollVariant}
+            className="flex-1 space-y-8 relative z-10"
+          >
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#141615] border border-white/10 text-xs font-medium text-[#BDCDD6] shadow-lg">
               <HugeiconsIcon icon={SparklesIcon} strokeWidth={2} className="size-3" />
-              <span>Gmail and Calendar, finally in rhythm</span>
+              <span>Connect the apps you already use</span>
             </div>
             <h1 className="text-5xl lg:text-7xl font-black tracking-tighter leading-[1.05] text-white">
               Your day, <br className="hidden lg:block"/>arranged before <br className="hidden lg:block"/>it starts shouting.
             </h1>
             <p className="text-lg text-[#929E96] max-w-xl leading-relaxed">
-              Tell Fly what needs to happen. It reads the request, schedules the meeting, prepares the follow-up, and keeps the next action obvious.
+              Tell Fly what needs to happen. It reads the request across your tools, schedules the meeting, prepares the follow-up, and keeps the next action obvious.
             </p>
             <div className="flex flex-col sm:flex-row items-center gap-4 pt-4">
               <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="w-full sm:w-auto">
-                <Link href="/dashboard" className="w-full px-6 py-3 text-sm font-semibold bg-white text-black rounded-full text-center flex items-center justify-center gap-2">
+                <Link href="/dashboard" className="w-full px-6 py-3 text-sm font-semibold bg-white text-black rounded-full text-center flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(255,255,255,0.15)]">
                   Get started free
                   <span className="text-black/50">→</span>
                 </Link>
               </motion.div>
               <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="w-full sm:w-auto">
-                <Link href="#pricing" className="w-full px-6 py-3 text-sm font-medium bg-[#141615] border border-white/10 text-white rounded-full text-center block">
+                <Link href="#pricing" className="w-full px-6 py-3 text-sm font-medium bg-[#141615] border border-white/10 text-white rounded-full text-center block hover:bg-white/5 transition-colors">
                   View pricing
                 </Link>
               </motion.div>
             </div>
-          </div>
+          </motion.div>
 
-          <motion.div 
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.2, duration: 0.6 }}
-            className="flex-1 w-full relative"
-          >
-            <div className="absolute inset-0 bg-[#BDCDD6] opacity-10 blur-[80px] rounded-full"></div>
-            {/* Command Palette Mockup */}
-            <div className="relative bg-[#141615] border border-[#BDCDD6]/20 rounded-2xl p-4 shadow-2xl backdrop-blur-xl">
+          {/* Layered 3D Dashboard Mockup */}
+          <div className="flex-1 w-full relative h-[400px] md:h-[500px] z-10 perspective-1000">
+            <div className="absolute inset-0 bg-[#BDCDD6] opacity-10 blur-[100px] rounded-full"></div>
+            
+            {/* Background Layer (Blurred context) */}
+            <motion.div 
+              initial={{ opacity: 0, x: 40, rotateY: -10 }}
+              animate={{ opacity: 1, x: 0, rotateY: 0 }}
+              transition={{ delay: 0.3, duration: 0.8, type: "spring" }}
+              className="absolute top-0 right-0 w-[85%] bg-[#0A0B0A]/80 border border-white/5 rounded-2xl p-4 shadow-xl backdrop-blur-sm"
+            >
+              <div className="flex items-center gap-3 border-b border-white/5 pb-3 mb-3">
+                <SiGooglecalendar className="size-3 text-[#4285F4]" />
+                <span className="text-xs font-medium text-[#929E96]">Thursday, Oct 12</span>
+              </div>
+              <div className="space-y-2 opacity-50">
+                <div className="h-10 bg-white/5 rounded-lg w-full"></div>
+                <div className="h-10 bg-white/5 rounded-lg w-3/4"></div>
+              </div>
+            </motion.div>
+
+            {/* Middle Layer (Main Command Palette) */}
+            <motion.div 
+              initial={{ opacity: 0, y: 50 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5, duration: 0.7, type: "spring" }}
+              className="absolute top-20 left-0 w-[90%] bg-[#141615] border border-[#BDCDD6]/30 rounded-2xl p-5 shadow-2xl backdrop-blur-xl z-10"
+            >
               <div className="flex items-center gap-3 border-b border-white/10 pb-4 mb-4">
                 <span className="text-xs font-bold text-[#BDCDD6] tracking-widest uppercase">Fly Command</span>
               </div>
@@ -106,64 +177,64 @@ export default function LandingPage() {
                     <HugeiconsIcon icon={Calendar01Icon} strokeWidth={2} className="size-4" />
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-white">Calendar event created</p>
+                    <p className="text-sm font-medium text-white">Calendar event prepared</p>
                     <p className="text-xs text-[#929E96]">Thu, 10:30 AM • High priority</p>
                   </div>
                 </div>
-                <div className="flex items-center gap-3 p-3 rounded-xl bg-[#0A0B0A]/50 border border-[#E8D5C4]/10">
-                  <div className="bg-[#E8D5C4]/10 p-2 rounded-lg text-[#E8D5C4]">
-                    <HugeiconsIcon icon={Mail01Icon} strokeWidth={2} className="size-4" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-white">Email draft ready</p>
-                    <p className="text-xs text-[#929E96]">Friendly, concise, ready to review</p>
-                  </div>
-                </div>
               </div>
-              <div className="mt-4 pt-4 border-t border-white/10 flex items-center justify-between">
-                <p className="text-xs text-[#929E96] flex items-center gap-2">
-                  <HugeiconsIcon icon={CheckmarkCircle01Icon} className="size-3 text-[#BDCDD6]" />
-                  Review checkpoint on. Nothing sensitive sends blind.
-                </p>
+            </motion.div>
+
+            {/* Top Layer (Floating Success Badge) */}
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.5 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.9, duration: 0.5, type: "spring", bounce: 0.5 }}
+              className="absolute bottom-16 right-0 bg-[#BDCDD6] border border-white/20 p-4 rounded-2xl shadow-[0_20px_40px_rgba(189,205,214,0.25)] z-20 flex items-center gap-4"
+            >
+              <div className="bg-[#0A0B0A] p-2 rounded-full text-[#BDCDD6]">
+                <HugeiconsIcon icon={CheckmarkCircle01Icon} strokeWidth={2} className="size-5" />
               </div>
-            </div>
-          </motion.div>
-        </motion.section>
+              <div>
+                <p className="text-sm font-bold text-[#0A0B0A]">Ready to review</p>
+                <p className="text-xs text-[#0A0B0A]/70 font-medium">Draft & Event staged</p>
+              </div>
+            </motion.div>
+          </div>
+        </section>
 
         {/* Metrics Bar */}
         <motion.section 
           initial="hidden" 
           whileInView="visible" 
           viewport={{ once: true }} 
-          variants={scrollVariant}
+          variants={staggerContainer}
           className="px-6 max-w-6xl mx-auto pb-24"
         >
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 p-8 rounded-2xl bg-[#141615] border border-white/5">
-            <div className="space-y-2">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 p-8 rounded-2xl bg-[#141615] border border-white/5 shadow-xl">
+            <motion.div variants={staggerItem} className="space-y-2">
               <p className="text-4xl font-black tracking-tighter text-white">42%</p>
               <p className="text-xs font-bold uppercase tracking-widest text-[#929E96]">Less inbox switching</p>
-            </div>
-            <div className="space-y-2 border-t md:border-t-0 md:border-l border-white/10 pt-4 md:pt-0 md:pl-8">
+            </motion.div>
+            <motion.div variants={staggerItem} className="space-y-2 border-t md:border-t-0 md:border-l border-white/10 pt-4 md:pt-0 md:pl-8">
               <p className="text-4xl font-black tracking-tighter text-white">3 min</p>
               <p className="text-xs font-bold uppercase tracking-widest text-[#929E96]">Average scheduling flow</p>
-            </div>
-            <div className="space-y-2 border-t md:border-t-0 md:border-l border-white/10 pt-4 md:pt-0 md:pl-8">
+            </motion.div>
+            <motion.div variants={staggerItem} className="space-y-2 border-t md:border-t-0 md:border-l border-white/10 pt-4 md:pt-0 md:pl-8">
               <p className="text-4xl font-black tracking-tighter text-white">24/7</p>
               <p className="text-xs font-bold uppercase tracking-widest text-[#929E96]">Calendar context</p>
-            </div>
+            </motion.div>
           </div>
         </motion.section>
 
         {/* Bento Grid Features */}
-        <motion.section 
-          id="features" 
-          initial="hidden" 
-          whileInView="visible" 
-          viewport={{ once: true }} 
-          variants={scrollVariant}
-          className="px-6 max-w-6xl mx-auto py-24 border-t border-white/5"
-        >
-          <div className="mb-16 max-w-2xl">
+        <section id="features" className="px-6 max-w-6xl mx-auto py-24 border-t border-white/5">
+          <motion.div 
+            initial="hidden" 
+            whileInView="visible" 
+            viewport={{ once: true }} 
+            variants={scrollVariant}
+            className="mb-16 max-w-2xl"
+          >
             <p className="text-[#BDCDD6] text-xs font-bold uppercase tracking-widest mb-4">What We Do</p>
             <h2 className="text-4xl md:text-5xl font-black tracking-tighter text-white leading-tight mb-6">
               The smart calendar assistant that keeps your day simple.
@@ -171,12 +242,18 @@ export default function LandingPage() {
             <p className="text-lg text-[#929E96]">
               Every feature is written in plain words so you always know what your schedule is doing. Fly is built for the recurring mess: a client emails a date, someone changes the time, the calendar needs priority.
             </p>
-          </div>
+          </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <motion.div whileHover={{ y: -5 }} className="bg-[#141615] border border-white/5 p-8 rounded-2xl hover:border-[#BDCDD6]/50 transition-colors duration-300 group shadow-lg hover:shadow-[0_0_20px_rgba(189,205,214,0.15)] relative overflow-hidden">
+          <motion.div 
+            initial="hidden" 
+            whileInView="visible" 
+            viewport={{ once: true, margin: "-100px" }} 
+            variants={staggerContainer}
+            className="grid grid-cols-1 md:grid-cols-2 gap-4"
+          >
+            <motion.div variants={staggerItem} whileHover={{ y: -5 }} className="bg-[#141615] border border-white/5 p-8 rounded-2xl hover:border-[#BDCDD6]/50 transition-colors duration-300 group shadow-lg hover:shadow-[0_0_20px_rgba(189,205,214,0.15)] relative overflow-hidden">
               <div className="absolute top-8 right-8 text-6xl font-black text-white/5 group-hover:text-white/10 transition-colors">01</div>
-              <div className="bg-[#0A0B0A] p-3 rounded-xl border border-white/10 text-[#BDCDD6] w-max mb-8">
+              <div className="bg-[#0A0B0A] p-3 rounded-xl border border-white/10 text-[#BDCDD6] w-max mb-8 group-hover:scale-110 transition-transform">
                 <HugeiconsIcon icon={ZapIcon} strokeWidth={2} className="size-5" />
               </div>
               <h3 className="text-xl font-bold text-white mb-3">Plain-language scheduling</h3>
@@ -185,9 +262,9 @@ export default function LandingPage() {
               </p>
             </motion.div>
 
-            <motion.div whileHover={{ y: -5 }} className="bg-[#141615] border border-white/5 p-8 rounded-2xl hover:border-[#BDCDD6]/50 transition-colors duration-300 group shadow-lg hover:shadow-[0_0_20px_rgba(189,205,214,0.15)] relative overflow-hidden">
+            <motion.div variants={staggerItem} whileHover={{ y: -5 }} className="bg-[#141615] border border-white/5 p-8 rounded-2xl hover:border-[#BDCDD6]/50 transition-colors duration-300 group shadow-lg hover:shadow-[0_0_20px_rgba(189,205,214,0.15)] relative overflow-hidden">
               <div className="absolute top-8 right-8 text-6xl font-black text-white/5 group-hover:text-white/10 transition-colors">02</div>
-              <div className="bg-[#0A0B0A] p-3 rounded-xl border border-white/10 text-[#BDCDD6] w-max mb-8">
+              <div className="bg-[#0A0B0A] p-3 rounded-xl border border-white/10 text-[#BDCDD6] w-max mb-8 group-hover:scale-110 transition-transform">
                 <HugeiconsIcon icon={Calendar01Icon} strokeWidth={2} className="size-5" />
               </div>
               <h3 className="text-xl font-bold text-white mb-3">Gmail plus Calendar context</h3>
@@ -196,9 +273,9 @@ export default function LandingPage() {
               </p>
             </motion.div>
 
-            <motion.div whileHover={{ y: -5 }} className="bg-[#141615] border border-white/5 p-8 rounded-2xl hover:border-[#BDCDD6]/50 transition-colors duration-300 group shadow-lg hover:shadow-[0_0_20px_rgba(189,205,214,0.15)] relative overflow-hidden">
+            <motion.div variants={staggerItem} whileHover={{ y: -5 }} className="bg-[#141615] border border-white/5 p-8 rounded-2xl hover:border-[#BDCDD6]/50 transition-colors duration-300 group shadow-lg hover:shadow-[0_0_20px_rgba(189,205,214,0.15)] relative overflow-hidden">
               <div className="absolute top-8 right-8 text-6xl font-black text-white/5 group-hover:text-white/10 transition-colors">03</div>
-              <div className="bg-[#0A0B0A] p-3 rounded-xl border border-white/10 text-[#BDCDD6] w-max mb-8">
+              <div className="bg-[#0A0B0A] p-3 rounded-xl border border-white/10 text-[#BDCDD6] w-max mb-8 group-hover:scale-110 transition-transform">
                 <HugeiconsIcon icon={Mail01Icon} strokeWidth={2} className="size-5" />
               </div>
               <h3 className="text-xl font-bold text-white mb-3">Follow-ups with review</h3>
@@ -207,9 +284,9 @@ export default function LandingPage() {
               </p>
             </motion.div>
 
-            <motion.div whileHover={{ y: -5 }} className="bg-[#141615] border border-white/5 p-8 rounded-2xl hover:border-[#BDCDD6]/50 transition-colors duration-300 group shadow-lg hover:shadow-[0_0_20px_rgba(189,205,214,0.15)] relative overflow-hidden">
+            <motion.div variants={staggerItem} whileHover={{ y: -5 }} className="bg-[#141615] border border-white/5 p-8 rounded-2xl hover:border-[#BDCDD6]/50 transition-colors duration-300 group shadow-lg hover:shadow-[0_0_20px_rgba(189,205,214,0.15)] relative overflow-hidden">
               <div className="absolute top-8 right-8 text-6xl font-black text-white/5 group-hover:text-white/10 transition-colors">04</div>
-              <div className="bg-[#0A0B0A] p-3 rounded-xl border border-white/10 text-[#BDCDD6] w-max mb-8">
+              <div className="bg-[#0A0B0A] p-3 rounded-xl border border-white/10 text-[#BDCDD6] w-max mb-8 group-hover:scale-110 transition-transform">
                 <HugeiconsIcon icon={SparklesIcon} strokeWidth={2} className="size-5" />
               </div>
               <h3 className="text-xl font-bold text-white mb-3">Priority focus mode</h3>
@@ -217,8 +294,8 @@ export default function LandingPage() {
                 Mark what matters, quiet the noise, and keep the next useful action visible across your day seamlessly.
               </p>
             </motion.div>
-          </div>
-        </motion.section>
+          </motion.div>
+        </section>
 
         {/* Workflow Simulation (The Engine) */}
         <motion.section 
@@ -276,6 +353,66 @@ export default function LandingPage() {
           </div>
         </motion.section>
 
+        {/* Integrations Showcase */}
+        <section className="px-6 max-w-6xl mx-auto py-24 border-t border-white/5">
+          <motion.div 
+            initial="hidden" 
+            whileInView="visible" 
+            viewport={{ once: true }} 
+            variants={scrollVariant}
+            className="mb-16 text-center"
+          >
+            <p className="text-[#BDCDD6] text-xs font-bold uppercase tracking-widest mb-4">Integrations</p>
+            <h2 className="text-4xl font-black tracking-tighter text-white leading-tight mb-6">
+              Connects with tools you already use.
+            </h2>
+          </motion.div>
+
+          <motion.div 
+            initial="hidden" 
+            whileInView="visible" 
+            viewport={{ once: true }} 
+            variants={staggerContainer}
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"
+          >
+            {/* GitHub */}
+            <motion.div variants={staggerItem} whileHover={{ y: -5 }} className="bg-[#141615] border border-white/5 p-6 rounded-2xl hover:border-white/20 transition-colors shadow-lg group">
+              <div className="bg-white p-3 rounded-2xl w-max mb-4 shadow-[0_0_15px_rgba(255,255,255,0.2)] group-hover:shadow-[0_0_25px_rgba(255,255,255,0.4)] transition-shadow">
+                <FaGithub className="size-8 text-[#0A0B0A]" />
+              </div>
+              <h3 className="text-lg font-bold text-white mb-2">GitHub</h3>
+              <p className="text-[#929E96] text-xs leading-relaxed">Connect to track PRs and sync code updates directly to your calendar blocks.</p>
+            </motion.div>
+
+            {/* Gmail */}
+            <motion.div variants={staggerItem} whileHover={{ y: -5 }} className="bg-[#141615] border border-white/5 p-6 rounded-2xl hover:border-white/20 transition-colors shadow-lg group">
+              <div className="bg-white p-3 rounded-2xl w-max mb-4 shadow-[0_0_15px_rgba(234,67,53,0.2)] group-hover:shadow-[0_0_25px_rgba(234,67,53,0.4)] transition-shadow">
+                <SiGmail className="size-8 text-[#ea4335]" />
+              </div>
+              <h3 className="text-lg font-bold text-white mb-2">Gmail</h3>
+              <p className="text-[#929E96] text-xs leading-relaxed">Fly drafts responses and links email threads directly to your calendar events.</p>
+            </motion.div>
+
+            {/* Slack */}
+            <motion.div variants={staggerItem} whileHover={{ y: -5 }} className="bg-[#141615] border border-white/5 p-6 rounded-2xl hover:border-white/20 transition-colors shadow-lg group">
+              <div className="bg-white p-3 rounded-2xl w-max mb-4 shadow-[0_0_15px_rgba(224,30,90,0.2)] group-hover:shadow-[0_0_25px_rgba(224,30,90,0.4)] transition-shadow">
+                <FaSlack className="size-8 text-[#E01E5A]" />
+              </div>
+              <h3 className="text-lg font-bold text-white mb-2">Slack</h3>
+              <p className="text-[#929E96] text-xs leading-relaxed">Turn DMs into tasks and meetings instantly with simple slash commands.</p>
+            </motion.div>
+
+            {/* Drive */}
+            <motion.div variants={staggerItem} whileHover={{ y: -5 }} className="bg-[#141615] border border-white/5 p-6 rounded-2xl hover:border-white/20 transition-colors shadow-lg group">
+              <div className="bg-white p-3 rounded-2xl w-max mb-4 shadow-[0_0_15px_rgba(255,186,0,0.2)] group-hover:shadow-[0_0_25px_rgba(255,186,0,0.4)] transition-shadow">
+                <FaGoogleDrive className="size-8 text-[#FFBA00]" />
+              </div>
+              <h3 className="text-lg font-bold text-white mb-2">Google Drive</h3>
+              <p className="text-[#929E96] text-xs leading-relaxed">Auto-attach relevant documents to meetings based on the email context.</p>
+            </motion.div>
+          </motion.div>
+        </section>
+
         {/* Testimonials Marquee */}
         <motion.section 
           id="testimonials" 
@@ -332,15 +469,14 @@ export default function LandingPage() {
         </motion.section>
 
         {/* Pricing */}
-        <motion.section 
-          id="pricing" 
-          initial="hidden" 
-          whileInView="visible" 
-          viewport={{ once: true }} 
-          variants={scrollVariant}
-          className="py-28 border-t border-white/5 px-6"
-        >
-          <div className="max-w-6xl mx-auto">
+        <section id="pricing" className="py-28 border-t border-white/5 px-6">
+          <motion.div 
+            initial="hidden" 
+            whileInView="visible" 
+            viewport={{ once: true }} 
+            variants={scrollVariant}
+            className="max-w-6xl mx-auto"
+          >
             <div className="text-center mb-16">
               <p className="text-[#BDCDD6] text-xs font-bold uppercase tracking-widest mb-4">Pricing</p>
               <h2 className="text-4xl md:text-5xl font-black tracking-tighter text-white mb-6">
@@ -349,9 +485,16 @@ export default function LandingPage() {
               <p className="text-lg text-[#929E96]">Start free and upgrade when you want deeper automation.</p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
+            <motion.div 
+              variants={staggerContainer}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true }}
+              className="grid grid-cols-1 md:grid-cols-3 gap-6 items-center"
+            >
               {/* Free */}
               <motion.div 
+                variants={staggerItem}
                 whileHover={{ scale: 1.02 }} 
                 className="bg-[#141615] border border-white/5 rounded-3xl p-8 hover:border-white/20 transition-colors duration-300 shadow-lg"
               >
@@ -373,6 +516,7 @@ export default function LandingPage() {
 
               {/* Pro */}
               <motion.div 
+                variants={staggerItem}
                 whileHover={{ scale: 1.07 }} 
                 className="bg-[#141615] border border-[#BDCDD6] rounded-3xl p-8 relative scale-100 md:scale-105 z-10 shadow-[0_0_40px_rgba(189,205,214,0.1)] hover:shadow-[0_0_50px_rgba(189,205,214,0.2)] transition-shadow duration-300"
               >
@@ -397,6 +541,7 @@ export default function LandingPage() {
 
               {/* Pro+ */}
               <motion.div 
+                variants={staggerItem}
                 whileHover={{ scale: 1.02 }} 
                 className="bg-[#141615] border border-white/5 rounded-3xl p-8 hover:border-white/20 transition-colors duration-300 shadow-lg"
               >
@@ -416,8 +561,8 @@ export default function LandingPage() {
                 </motion.button>
               </motion.div>
             </div>
-          </div>
-        </motion.section>
+          </motion.div>
+        </section>
 
         {/* Footer */}
         <footer className="border-t border-white/5 pt-24 pb-8 px-6">
