@@ -1,17 +1,9 @@
-import { redirect } from "next/navigation"
+import { AuthGuard } from "@/components/auth-guard"
 
-import { hasAuthSession } from "@/lib/auth"
-
-export default async function ProtectedLayout({
+export default function ProtectedLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
-  const hasSession = await hasAuthSession()
-
-  if (!hasSession) {
-    redirect("/login")
-  }
-
-  return <>{children}</>
+  return <AuthGuard>{children}</AuthGuard>
 }
