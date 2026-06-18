@@ -89,7 +89,7 @@ export default function LandingPage() {
               </div>
               <div className="mt-4 pt-4 border-t border-white/10 flex items-center justify-between">
                 <p className="text-xs text-[#929E96] flex items-center gap-2">
-                  <CheckmarkCircle01Icon className="size-3 text-[#BDCDD6]" />
+                  <HugeiconsIcon icon={CheckmarkCircle01Icon} className="size-3 text-[#BDCDD6]" />
                   Review checkpoint on. Nothing sensitive sends blind.
                 </p>
               </div>
@@ -131,7 +131,7 @@ export default function LandingPage() {
             <div className="bg-[#141615] border border-white/5 p-8 rounded-2xl hover:border-[#BDCDD6]/30 transition-all duration-300 group">
               <div className="flex items-center justify-between mb-8">
                 <div className="bg-[#0A0B0A] p-3 rounded-xl border border-white/10 text-[#BDCDD6]">
-                  <ZapIcon strokeWidth={2} className="size-5" />
+                  <HugeiconsIcon icon={ZapIcon} strokeWidth={2} className="size-5" />
                 </div>
                 <span className="text-5xl font-black text-white/5">01</span>
               </div>
@@ -145,7 +145,7 @@ export default function LandingPage() {
             <div className="bg-[#141615] border border-white/5 p-8 rounded-2xl hover:border-[#BDCDD6]/30 transition-all duration-300 group">
               <div className="flex items-center justify-between mb-8">
                 <div className="bg-[#0A0B0A] p-3 rounded-xl border border-white/10 text-[#BDCDD6]">
-                  <Calendar01Icon strokeWidth={2} className="size-5" />
+                  <HugeiconsIcon icon={Calendar01Icon} strokeWidth={2} className="size-5" />
                 </div>
                 <span className="text-5xl font-black text-white/5">02</span>
               </div>
@@ -159,7 +159,7 @@ export default function LandingPage() {
             <div className="bg-[#141615] border border-white/5 p-8 rounded-2xl hover:border-[#BDCDD6]/30 transition-all duration-300 group">
               <div className="flex items-center justify-between mb-8">
                 <div className="bg-[#0A0B0A] p-3 rounded-xl border border-white/10 text-[#BDCDD6]">
-                  <Mail01Icon strokeWidth={2} className="size-5" />
+                  <HugeiconsIcon icon={Mail01Icon} strokeWidth={2} className="size-5" />
                 </div>
                 <span className="text-5xl font-black text-white/5">03</span>
               </div>
@@ -173,7 +173,7 @@ export default function LandingPage() {
             <div className="bg-[#141615] border border-white/5 p-8 rounded-2xl hover:border-[#BDCDD6]/30 transition-all duration-300 group">
               <div className="flex items-center justify-between mb-8">
                 <div className="bg-[#0A0B0A] p-3 rounded-xl border border-white/10 text-[#BDCDD6]">
-                  <SparklesIcon strokeWidth={2} className="size-5" />
+                  <HugeiconsIcon icon={SparklesIcon} strokeWidth={2} className="size-5" />
                 </div>
                 <span className="text-5xl font-black text-white/5">04</span>
               </div>
@@ -268,9 +268,9 @@ export default function LandingPage() {
                   <span className="text-sm font-medium text-[#929E96]">/ month</span>
                 </div>
                 <ul className="space-y-4 mb-8">
-                  <li className="flex items-center gap-3 text-sm text-[#929E96]"><CheckmarkCircle01Icon className="size-4 text-white/20"/> Calendar + Gmail summary</li>
-                  <li className="flex items-center gap-3 text-sm text-[#929E96]"><CheckmarkCircle01Icon className="size-4 text-white/20"/> 5 AI requests per week</li>
-                  <li className="flex items-center gap-3 text-sm text-[#929E96]"><CheckmarkCircle01Icon className="size-4 text-white/20"/> Manual review before send</li>
+                  <li className="flex items-center gap-3 text-sm text-[#929E96]"><HugeiconsIcon icon={CheckmarkCircle01Icon} className="size-4 text-white/20"/> Calendar + Gmail summary</li>
+                  <li className="flex items-center gap-3 text-sm text-[#929E96]"><HugeiconsIcon icon={CheckmarkCircle01Icon} className="size-4 text-white/20"/> 5 AI requests per week</li>
+                  <li className="flex items-center gap-3 text-sm text-[#929E96]"><HugeiconsIcon icon={CheckmarkCircle01Icon} className="size-4 text-white/20"/> Manual review before send</li>
                 </ul>
                 <button className="w-full py-3 rounded-full bg-[#0A0B0A] border border-white/10 text-white font-medium hover:bg-white/5 transition-colors">
                   Choose Free
@@ -280,7 +280,7 @@ export default function LandingPage() {
               {/* Pro */}
               <div className="bg-[#141615] border border-[#BDCDD6] rounded-3xl p-8 relative scale-100 md:scale-105 z-10 shadow-[0_0_40px_rgba(189,205,214,0.1)]">
                 <div className="absolute top-0 right-8 -translate-y-1/2 bg-[#BDCDD6] text-[#0A0B0A] px-3 py-1 rounded-full text-xs font-bold uppercase tracking-widest flex items-center gap-1">
-                  <SparklesIcon className="size-3"/> Popular
+                  <HugeiconsIcon icon={SparklesIcon} className="size-3"/> Popular
                 </div>
                 <h3 className="text-xl font-bold text-white mb-2">Pro</h3>
                 <p className="text-sm text-[#929E96] mb-8">For people who live between meetings and email.</p>
@@ -289,9 +289,9 @@ export default function LandingPage() {
                   <span className="text-sm font-medium text-[#929E96]">/ month</span>
                 </div>
                 <ul className="space-y-4 mb-8">
-                  <li className="flex items-center gap-3 text-sm text-[#929E96]"><CheckmarkCircle01Icon className="size-4 text-[#BDCDD6]"/> Unlimited scheduling prompts</li>
-                  <li className="flex items-center gap-3 text-sm text-[#929E96]"><CheckmarkCircle01Icon className="size-4 text-[#BDCDD6]"/> Meeting priority tags</li>
-                  <li className="flex items-center gap-3 text-sm text-[#929E96]"><CheckmarkCircle01Icon className="size-4 text-[#BDCDD6]"/> Automatic follow-up drafts</li>
+                  <li className="flex items-center gap-3 text-sm text-[#929E96]"><HugeiconsIcon icon={CheckmarkCircle01Icon} className="size-4 text-[#BDCDD6]"/> Unlimited scheduling prompts</li>
+                  <li className="flex items-center gap-3 text-sm text-[#929E96]"><HugeiconsIcon icon={CheckmarkCircle01Icon} className="size-4 text-[#BDCDD6]"/> Meeting priority tags</li>
+                  <li className="flex items-center gap-3 text-sm text-[#929E96]"><HugeiconsIcon icon={CheckmarkCircle01Icon} className="size-4 text-[#BDCDD6]"/> Automatic follow-up drafts</li>
                 </ul>
                 <button className="w-full py-3 rounded-full bg-[#BDCDD6] text-[#0A0B0A] font-bold hover:bg-[#BDCDD6]/90 transition-colors">
                   Choose Pro
@@ -307,9 +307,9 @@ export default function LandingPage() {
                   <span className="text-sm font-medium text-[#929E96]">/ month</span>
                 </div>
                 <ul className="space-y-4 mb-8">
-                  <li className="flex items-center gap-3 text-sm text-[#929E96]"><CheckmarkCircle01Icon className="size-4 text-white/20"/> Shared calendar suggestions</li>
-                  <li className="flex items-center gap-3 text-sm text-[#929E96]"><CheckmarkCircle01Icon className="size-4 text-white/20"/> Email templates and follow-ups</li>
-                  <li className="flex items-center gap-3 text-sm text-[#929E96]"><CheckmarkCircle01Icon className="size-4 text-white/20"/> Priority inbox focus mode</li>
+                  <li className="flex items-center gap-3 text-sm text-[#929E96]"><HugeiconsIcon icon={CheckmarkCircle01Icon} className="size-4 text-white/20"/> Shared calendar suggestions</li>
+                  <li className="flex items-center gap-3 text-sm text-[#929E96]"><HugeiconsIcon icon={CheckmarkCircle01Icon} className="size-4 text-white/20"/> Email templates and follow-ups</li>
+                  <li className="flex items-center gap-3 text-sm text-[#929E96]"><HugeiconsIcon icon={CheckmarkCircle01Icon} className="size-4 text-white/20"/> Priority inbox focus mode</li>
                 </ul>
                 <button className="w-full py-3 rounded-full bg-[#0A0B0A] border border-white/10 text-white font-medium hover:bg-white/5 transition-colors">
                   Choose Pro +
@@ -340,7 +340,7 @@ export default function LandingPage() {
             <div className="flex flex-col md:flex-row items-center justify-between border-t border-white/5 pt-8 text-xs font-medium text-[#929E96]">
               <div className="flex items-center gap-2 mb-4 md:mb-0">
                 <div className="size-4 bg-[#BDCDD6] rounded-[4px] flex items-center justify-center text-[#0A0B0A]">
-                  <CommandIcon className="size-3"/>
+                  <HugeiconsIcon icon={CommandIcon} className="size-3"/>
                 </div>
                 <p>© 2026 Fly. Built for people who want a calmer day.</p>
               </div>
