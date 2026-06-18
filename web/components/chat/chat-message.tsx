@@ -38,7 +38,7 @@ export function ChatMessageBubble({
       className={cn("flex gap-2.5", isUser ? "flex-row-reverse" : "flex-row")}
     >
       {!isUser ? (
-        <div className="mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-full bg-muted/60 text-muted-foreground/70">
+        <div className="mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-full bg-primary/12 text-primary/75 ring-1 ring-primary/15">
           <HugeiconsIcon icon={SparklesIcon} strokeWidth={2} className="size-3.5" />
         </div>
       ) : null}
@@ -48,8 +48,8 @@ export function ChatMessageBubble({
           className={cn(
             "rounded-2xl px-4 py-2.5 text-sm leading-relaxed",
             isUser
-              ? "rounded-tr-md bg-foreground/[0.06] text-foreground/90"
-              : "rounded-tl-md border border-border/40 bg-background text-foreground/85",
+              ? "rounded-tr-md bg-primary/90 text-primary-foreground"
+              : "rounded-tl-md border border-border/40 bg-card/50 text-foreground/90",
           )}
         >
           {showTyping ? (

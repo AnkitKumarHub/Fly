@@ -102,16 +102,6 @@ export function CalendarToolbar({
             <motion.div whileTap={reducedMotion ? undefined : navButtonTap}>
               <Button
                 variant="ghost"
-                size="sm"
-                onClick={onToday}
-                className="rounded-lg px-3 text-muted-foreground hover:bg-card hover:text-foreground"
-              >
-                Today
-              </Button>
-            </motion.div>
-            <motion.div whileTap={reducedMotion ? undefined : navButtonTap}>
-              <Button
-                variant="ghost"
                 size="icon-sm"
                 onClick={onNext}
                 aria-label="Next"
@@ -167,12 +157,22 @@ export function CalendarToolbar({
           />
         </form>
 
-        <div className="shrink-0 sm:ml-auto">
+        <div className="flex shrink-0 items-center gap-2 sm:ml-auto">
           <CalendarViewSwitcher
             view={view}
             reducedMotion={reducedMotion}
             onViewChange={onViewChange}
           />
+          <motion.div whileTap={reducedMotion ? undefined : navButtonTap}>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={onToday}
+              className="rounded-full border-border/60 px-3.5 text-muted-foreground hover:bg-muted/40 hover:text-foreground"
+            >
+              Today
+            </Button>
+          </motion.div>
         </div>
       </div>
     </div>

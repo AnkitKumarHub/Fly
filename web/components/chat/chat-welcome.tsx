@@ -2,29 +2,9 @@
 
 import { motion } from "motion/react"
 import { HugeiconsIcon } from "@hugeicons/react"
-import {
-  Mail01Icon,
-  Calendar03Icon,
-  PencilEdit01Icon,
-  Add01Icon,
-  SparklesIcon,
-} from "@hugeicons/core-free-icons"
-import { QUICK_PROMPTS } from "@/lib/agent-config"
-import { cn } from "@/lib/utils"
-import {
-  chatDuration,
-  chatTransition,
-  promptContainerVariants,
-  promptItemVariants,
-  welcomeIconVariants,
-} from "./chat-motion"
-
-const ICON_MAP = {
-  mail: Mail01Icon,
-  calendar: Calendar03Icon,
-  compose: PencilEdit01Icon,
-  event: Add01Icon,
-}
+import { SparklesIcon } from "@hugeicons/core-free-icons"
+import { ChatQuickPrompts } from "./chat-quick-prompts"
+import { chatDuration, welcomeIconVariants } from "./chat-motion"
 
 interface ChatWelcomeProps {
   onPromptClick: (prompt: string) => void
@@ -34,82 +14,50 @@ interface ChatWelcomeProps {
 
 export function ChatWelcome({ onPromptClick, disabled, reducedMotion }: ChatWelcomeProps) {
   return (
-    <div className="flex flex-1 flex-col items-center justify-center px-4 py-10 md:px-8 md:py-14">
-      {/* Sparkle + greeting */}
+    <div className="relative flex flex-1 flex-col items-center justify-center overflow-hidden px-5 py-10 md:px-8 md:py-12">
+      {/* Ambient wash */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_50%_40%_at_50%_30%,var(--chat-glow)_0%,transparent_70%)]"
+      />
+
       <motion.div
         initial={reducedMotion ? false : "initial"}
         animate="animate"
         variants={welcomeIconVariants}
-        className="mb-5 flex flex-col items-center gap-4"
+        className="relative mb-8 flex flex-col items-center gap-3"
       >
         <motion.div
           animate={
             reducedMotion
               ? undefined
-              : {
-                  opacity: [0.35, 0.55, 0.35],
-                  scale: [1, 1.04, 1],
-                }
+              : { opacity: [0.5, 0.85, 0.5], scale: [1, 1.03, 1] }
           }
           transition={
             reducedMotion
               ? undefined
-              : {
-                  duration: chatDuration.breathe,
-                  repeat: Infinity,
-                  ease: "easeInOut",
-                }
+              : { duration: chatDuration.breathe, repeat: Infinity, ease: "easeInOut" }
           }
-          className="flex size-14 items-center justify-center rounded-2xl bg-muted/40 text-muted-foreground/50"
+          className="flex size-12 items-center justify-center rounded-2xl bg-primary/10 text-primary/70 ring-1 ring-primary/15"
         >
-          <HugeiconsIcon icon={SparklesIcon} strokeWidth={1.5} className="size-7" />
+          <HugeiconsIcon icon={SparklesIcon} strokeWidth={1.75} className="size-6" />
         </motion.div>
 
-        <p className="text-center text-[15px] text-muted-foreground/80">
+        <h2 className="text-lg font-medium tracking-tight text-foreground/90">
           How can I help you today?
+        </h2>
+        <p className="max-w-sm text-center text-sm text-muted-foreground/80">
+          Ask about your inbox, calendar, or let Fly draft and schedule for you.
         </p>
       </motion.div>
 
-      {/* Suggestion cards */}
-      <motion.div
-        initial={reducedMotion ? false : "hidden"}
-        animate="show"
-        variants={promptContainerVariants}
-        className="grid w-full max-w-xl grid-cols-1 gap-2.5 sm:grid-cols-2 sm:gap-3"
-      >
-        {QUICK_PROMPTS.map((p) => {
-          const Icon = ICON_MAP[p.icon]
-          return (
-            <motion.button
-              key={p.id}
-              type="button"
-              variants={promptItemVariants}
-              initial={reducedMotion ? false : "hidden"}
-              animate="show"
-              whileHover={reducedMotion ? undefined : { y: -2 }}
-              whileTap={reducedMotion ? undefined : { scale: 0.985 }}
-              transition={chatTransition(reducedMotion, chatDuration.normal)}
-              onClick={() => onPromptClick(p.prompt)}
-              disabled={disabled}
-              className={cn(
-                "group flex items-center gap-3 rounded-xl border border-border/60 bg-background/50 px-4 py-3.5 text-left",
-                "transition-colors duration-200 hover:border-border hover:bg-muted/30",
-                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/30",
-                "disabled:pointer-events-none disabled:opacity-50",
-              )}
-            >
-              <div className="flex w-full items-center gap-3">
-                <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-muted/50 text-muted-foreground transition-colors group-hover:bg-muted/80 group-hover:text-foreground/70">
-                  <HugeiconsIcon icon={Icon} strokeWidth={2} className="size-3.5" />
-                </div>
-                <span className="text-[13px] leading-snug text-foreground/75 group-hover:text-foreground/90">
-                  {p.label}
-                </span>
-              </div>
-            </motion.button>
-          )
-        })}
-      </motion.div>
+      <div className="relative w-full flex justify-center">
+        <ChatQuickPrompts
+          onPromptClick={onPromptClick}
+          disabled={disabled}
+          reducedMotion={reducedMotion}
+        />
+      </div>
     </div>
   )
 }

@@ -23,27 +23,36 @@ export const QUICK_PROMPTS = [
   {
     id: "calendar-today",
     label: "What's on my calendar today?",
+    hint: "See today's schedule at a glance",
     prompt: "What events do I have on my calendar today?",
     icon: "calendar",
+    accent: "sky",
   },
   {
     id: "unread-emails",
-    label: "Summarize my most important unread emails.",
+    label: "Summarize unread emails",
+    hint: "Focus on what needs your attention",
     prompt: "Summarize my most important unread emails",
     icon: "mail",
+    accent: "sage",
   },
   {
     id: "draft-reply",
-    label: "Draft a reply to my latest email.",
+    label: "Draft a reply",
+    hint: "Respond to your latest message",
     prompt: "Help me draft a reply to my latest email",
     icon: "compose",
+    accent: "amber",
   },
   {
     id: "schedule-meeting",
-    label: "Schedule a 30-minute meeting tomorrow.",
+    label: "Schedule a meeting",
+    hint: "Book 30 minutes for tomorrow",
     prompt: "Help me schedule a 30-minute meeting tomorrow",
     icon: "event",
+    accent: "violet",
   },
 ] as const
 
 export type QuickPromptId = (typeof QUICK_PROMPTS)[number]["id"]
+export type QuickPromptAccent = (typeof QUICK_PROMPTS)[number]["accent"]
