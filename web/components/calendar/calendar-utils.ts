@@ -5,31 +5,11 @@ export type CalendarView = "month" | "week" | "day"
 export const WEEKDAY_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"] as const
 
 export const EVENT_COLORS = [
-  {
-    bg: "bg-[#ECECEA] dark:bg-[#2a2a28]",
-    text: "text-[#3D3D3B] dark:text-[#D4D4D2]",
-    border: "border-[#D8D8D6]/90 dark:border-[#3A3A38]",
-  },
-  {
-    bg: "bg-[#E8F0EB] dark:bg-[#243028]",
-    text: "text-[#2F4A38] dark:text-[#B8D4C4]",
-    border: "border-[#C8DDD0]/90 dark:border-[#345040]",
-  },
-  {
-    bg: "bg-[#EEEAE6] dark:bg-[#302C28]",
-    text: "text-[#4A4038] dark:text-[#D8CEC4]",
-    border: "border-[#DDD4CA]/90 dark:border-[#4A4038]",
-  },
-  {
-    bg: "bg-[#EAE8EE] dark:bg-[#2A2830]",
-    text: "text-[#3E3848] dark:text-[#CEC8D8]",
-    border: "border-[#D4D0DC]/90 dark:border-[#403A4A]",
-  },
-  {
-    bg: "bg-[#ECE8EA] dark:bg-[#30282C]",
-    text: "text-[#48343C] dark:text-[#D8C4CC]",
-    border: "border-[#DCD0D4]/90 dark:border-[#4A3840]",
-  },
+  { bg: "bg-[#D6E9FF]", text: "text-[#1e3a5f]", border: "border-[#b8d4f5]/80" },
+  { bg: "bg-[#D1F8E1]", text: "text-[#1a3d2e]", border: "border-[#b0e8c8]/80" },
+  { bg: "bg-[#FFEAD2]", text: "text-[#5c3d1e]", border: "border-[#f0d4b0]/80" },
+  { bg: "bg-[#EDE4F7]", text: "text-[#3d2e5c]", border: "border-[#d4c4eb]/80" },
+  { bg: "bg-[#F5E6E8]", text: "text-[#5c2e35]", border: "border-[#e8c8cc]/80" },
 ] as const
 
 export const HOUR_HEIGHT = 56

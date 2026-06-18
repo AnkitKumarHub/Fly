@@ -24,7 +24,7 @@ export function CalendarViewSwitcher({
   onViewChange,
 }: CalendarViewSwitcherProps) {
   return (
-    <div className="relative flex rounded-full border border-border/60 bg-card/80 p-1 shadow-[0_1px_2px_rgba(0,0,0,0.03)]">
+    <div className="relative flex rounded-full bg-muted/50 p-1 dark:bg-muted/30">
       {VIEWS.map((item) => {
         const active = view === item.id
 
@@ -35,15 +35,15 @@ export function CalendarViewSwitcher({
             onClick={() => onViewChange(item.id)}
             className={cn(
               "relative z-10 min-w-[4.25rem] rounded-full px-3 py-1.5 text-sm font-medium transition-colors duration-200",
-              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600/20",
-              active ? "text-foreground" : "text-muted-foreground hover:text-foreground/80",
+              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40",
+              active ? "text-foreground" : "text-muted-foreground hover:text-foreground",
             )}
           >
             {active ? (
               <motion.span
                 layoutId={reducedMotion ? undefined : "calendar-view-pill"}
                 transition={calendarTransition(reducedMotion, calendarDuration.normal)}
-                className="absolute inset-0 rounded-full bg-muted/70 shadow-sm ring-1 ring-border/40"
+                className="absolute inset-0 rounded-full bg-card shadow-sm ring-1 ring-border/50"
               />
             ) : null}
             <span className="relative">{item.label}</span>

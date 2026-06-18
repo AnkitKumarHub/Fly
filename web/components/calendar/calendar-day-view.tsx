@@ -47,15 +47,13 @@ export function CalendarDayView({
   }, [focusDate])
 
   return (
-    <div className="flex h-full min-h-0 flex-col overflow-hidden bg-[#F7F7F6] dark:bg-muted/10">
-      <div className="border-b border-border/50 bg-card/70 px-6 py-5">
+    <div className="flex h-full min-h-0 flex-col overflow-hidden">
+      <div className="border-b border-border/50 px-6 py-4">
         <p className="text-sm text-muted-foreground">{formatShortWeekday(focusDate)}</p>
         <p
           className={cn(
-            "mt-1.5 inline-flex size-12 items-center justify-center rounded-2xl text-3xl font-semibold tabular-nums",
-            today
-              ? "bg-emerald-700 text-white shadow-sm dark:bg-emerald-600"
-              : "bg-card text-foreground ring-1 ring-border/50",
+            "mt-1 inline-flex size-12 items-center justify-center rounded-2xl text-3xl font-semibold tabular-nums",
+            today ? "bg-foreground text-background" : "text-foreground",
           )}
         >
           {focusDate.getDate()}

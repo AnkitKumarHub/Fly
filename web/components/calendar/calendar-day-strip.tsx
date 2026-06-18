@@ -24,7 +24,7 @@ export function CalendarDayStrip({
   onSelectDay,
 }: CalendarDayStripProps) {
   return (
-    <div className="grid grid-cols-7 gap-2 border-b border-border/50 bg-[#F7F7F6]/60 px-4 py-3 dark:bg-muted/10 md:gap-2.5 md:px-6">
+    <div className="grid grid-cols-7 gap-2 border-b border-border/50 px-4 py-3 md:gap-2.5 md:px-6">
       {days.map((day) => {
         const selected = isSameDay(day, focusDate)
         const today = isToday(day)
@@ -40,20 +40,19 @@ export function CalendarDayStrip({
             transition={calendarTransition(reducedMotion, calendarDuration.fast)}
             onClick={() => onSelectDay(day)}
             className={cn(
-              "relative flex flex-col items-center justify-center rounded-2xl border px-2 py-2.5 text-center",
-              "shadow-[0_1px_2px_rgba(0,0,0,0.03)] transition-colors duration-200",
-              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600/25",
+              "flex flex-col items-center justify-center rounded-2xl px-2 py-2.5 text-center transition-colors",
+              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40",
               selected
-                ? "border-foreground/15 bg-foreground text-background shadow-sm"
+                ? "bg-foreground text-background"
                 : today
-                  ? "border-emerald-600/25 bg-card text-foreground ring-1 ring-emerald-600/15"
-                  : "border-border/55 bg-card text-foreground hover:border-border hover:bg-card/90",
+                  ? "bg-muted/60 text-foreground ring-1 ring-border/60"
+                  : "bg-muted/40 text-foreground hover:bg-muted/55",
             )}
           >
             <span
               className={cn(
                 "text-[11px] font-medium tracking-wide",
-                selected ? "text-background/75" : "text-muted-foreground",
+                selected ? "text-background/70" : "text-muted-foreground",
               )}
             >
               {day.toLocaleDateString(undefined, { weekday: "short" })}
@@ -61,9 +60,6 @@ export function CalendarDayStrip({
             <span className="mt-0.5 text-lg font-semibold tabular-nums tracking-tight">
               {day.getDate()}
             </span>
-            {today && !selected ? (
-              <span className="mt-1 size-1 rounded-full bg-emerald-600/80" />
-            ) : null}
           </motion.button>
         )
       })}

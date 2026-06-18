@@ -45,7 +45,7 @@ export function CalendarWeekView({
   }, [focusDate])
 
   return (
-    <div className="flex h-full min-h-0 flex-col overflow-hidden bg-[#F7F7F6] dark:bg-muted/10">
+    <div className="flex h-full min-h-0 flex-col overflow-hidden">
       <CalendarDayStrip
         days={days}
         focusDate={focusDate}
