@@ -42,3 +42,5 @@ next-env.d.ts
 auth.md
 ADR-001.md
 README.md
+skills-lock.json
+.agents
