@@ -95,6 +95,13 @@ dist
 # vuepress v2.x temp directory
 .temp
 
+.agents/
+.cursor/
+docs/
+thoughts.md
+skills-lock.json
+readme.md
+
 # Sveltekit cache directory
 .svelte-kit/
 
@@ -141,4 +148,7 @@ dist
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 .vite/
-docs/
+test.ts
+
+readme.md
+docker-compose.yml

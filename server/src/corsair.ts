@@ -1,7 +1,7 @@
-import "dotenv/config";
 import { createCorsair } from "corsair";
 import { gmail } from "@corsair-dev/gmail";
 import { googlecalendar } from "@corsair-dev/googlecalendar";
+import { env } from "./config/env.js";
 import { pool } from "./db/index.js";
 import { publishRealtimeEvent } from "./notifications/pg-bus.js";
 import type { RealtimeAction } from "./notifications/types.js";
@@ -83,6 +83,6 @@ export const corsair = createCorsair({
     },
   })],
   database: pool,
-  kek: process.env.CORSAIR_KEK!,
+  kek: env.corsairKek,
   multiTenancy: true,
 });

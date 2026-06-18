@@ -1,6 +1,6 @@
-import "dotenv/config";
 import { createServer } from "node:http";
 
+import { env } from "./config/env.js";
 import { startPgListener } from "./notifications/pg-bus.js";
 import { createApplication } from "./server.js";
 
@@ -9,10 +9,8 @@ async function main() {
     await startPgListener();
 
     const server = createServer(createApplication());
-    const PORT = Number(process.env.PORT) || 8000;
-
-    server.listen(PORT, () => {
-      console.log(`Server is running on port ${PORT} - http://localhost:${PORT}`);
+    server.listen(env.port, () => {
+      console.log(`Server is running on port ${env.port}`);
     });
   } catch {
     console.error("Error starting the server");
