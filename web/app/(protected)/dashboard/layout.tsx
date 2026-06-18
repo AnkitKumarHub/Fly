@@ -1,5 +1,6 @@
 import { AppSidebar } from "@/components/app-sidebar"
 import { DashboardRealtime } from "@/components/dashboard-realtime"
+import { IntegrationsPrefetch } from "@/components/integrations-prefetch"
 import { SiteHeader } from "@/components/site-header"
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
 
@@ -21,6 +22,7 @@ export default function DashboardLayout({
       <SidebarInset>
         <SiteHeader />
         <DashboardRealtime />
+        <IntegrationsPrefetch />
         <div className="flex flex-1 flex-col bg-background">
           <div className="@container/main flex flex-1 flex-col gap-2">
             {children}

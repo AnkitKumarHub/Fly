@@ -90,7 +90,7 @@ export default function CalendarPage() {
     setSeenEventIds(readSeenEventIds())
   }, [])
 
-  const { connectedPlugins } = useIntegrations()
+  const { connectedPlugins, isStatusLoading } = useIntegrations()
   const isCalendarConnected = connectedPlugins.includes("googlecalendar")
 
   const isSearching = activeQuery.trim().length > 0
@@ -133,6 +133,10 @@ export default function CalendarPage() {
       writeSeenEventIds(next)
       return next
     })
+  }
+
+  if (isStatusLoading) {
+    return <CalendarStatusSkeleton />
   }
 
   if (!isCalendarConnected) {
@@ -341,6 +345,37 @@ function EventDetailView({
           Open in Google Calendar
         </a>
       ) : null}
+    </div>
+  )
+}
+
+function CalendarStatusSkeleton() {
+  return (
+    <div className="flex h-[calc(100vh-var(--header-height))] flex-col">
+      <div className="flex items-center justify-between gap-4 border-b border-border px-6 py-4">
+        <Skeleton className="h-7 w-28" />
+        <div className="flex items-center gap-2">
+          <Skeleton className="h-8 w-20" />
+          <Skeleton className="h-8 w-24" />
+        </div>
+      </div>
+      <div className="flex min-h-0 flex-1">
+        <div className="flex w-full max-w-sm flex-col border-r border-border">
+          <div className="border-b border-border p-3">
+            <Skeleton className="h-9 w-full rounded-md" />
+          </div>
+          <div className="flex flex-col gap-2 p-3">
+            {Array.from({ length: 6 }).map((_, index) => (
+              <Skeleton key={index} className="h-16 w-full rounded-lg" />
+            ))}
+          </div>
+        </div>
+        <div className="min-w-0 flex-1 p-8">
+          <Skeleton className="h-8 w-2/3" />
+          <Skeleton className="mt-4 h-4 w-1/3" />
+          <Skeleton className="mt-8 h-32 w-full" />
+        </div>
+      </div>
     </div>
   )
 }

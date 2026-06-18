@@ -9,7 +9,7 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
 import { HugeiconsIcon } from "@hugeicons/react"
-import { Logout01Icon } from "@hugeicons/core-free-icons"
+import { Logout05Icon } from "@hugeicons/core-free-icons"
 
 import { useSignOut } from "@/hooks/use-sign-out"
 
@@ -46,7 +46,7 @@ export function NavUser({
             onClick={() => signOut.mutate()}
             className="flex size-8 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground disabled:pointer-events-none disabled:opacity-50"
           >
-            <HugeiconsIcon icon={Logout01Icon} strokeWidth={2} className="size-4" />
+            <HugeiconsIcon icon={Logout05Icon} strokeWidth={2} className="size-4" />
           </button>
         </div>
       </SidebarMenuItem>

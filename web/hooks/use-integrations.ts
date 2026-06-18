@@ -1,7 +1,7 @@
 "use client"
 
 import { useCallback, useEffect } from "react"
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { useRouter, useSearchParams } from "next/navigation"
 
 import { api } from "@/lib/api"
@@ -27,6 +27,8 @@ export function useIntegrations() {
     queryKey: ["integrations", "status"],
     refetchOnWindowFocus: false,
     retry: false,
+    staleTime: 5 * 60 * 1000,
+    placeholderData: keepPreviousData,
     queryFn: async () => {
       const { data } = await api.get("/integrations/status")
       return data.data as IntegrationStatus
@@ -73,6 +75,8 @@ export function useIntegrations() {
     connectPlugin,
     disconnectPlugin,
     isLoading: statusQuery.isLoading,
+    isStatusLoading: statusQuery.isPending,
+    isStatusFetching: statusQuery.isFetching,
     isDisconnecting: disconnectMutation.isPending,
   }
 }

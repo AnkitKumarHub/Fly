@@ -167,7 +167,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               render={<a href="#" />}
             >
               <HugeiconsIcon icon={CommandIcon} strokeWidth={2} className="size-5!" />
-              <span className="text-base font-semibold">Acme Inc.</span>
+              <span className="text-base font-semibold">Fly</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
