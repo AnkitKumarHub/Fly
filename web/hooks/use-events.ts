@@ -52,9 +52,10 @@ export interface UpdateEventInput {
   sendUpdates?: "all" | "externalOnly" | "none"
 }
 
-export function useEvents(limit = 25) {
+export function useEvents(limit = 25, enabled = true) {
   return useQuery({
     queryKey: ["events", "list", limit],
+    enabled,
     refetchOnWindowFocus: false,
     retry: false,
     queryFn: async () => {

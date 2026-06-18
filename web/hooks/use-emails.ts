@@ -35,9 +35,10 @@ export interface ComposeInput {
   body: string
 }
 
-export function useEmails(limit = 25) {
+export function useEmails(limit = 25, enabled = true) {
   return useQuery({
     queryKey: ["emails", "list", limit],
+    enabled,
     refetchOnWindowFocus: false,
     retry: false,
     queryFn: async () => {

@@ -316,32 +316,61 @@ export default function LandingPage() {
 
           <div className="flex flex-col md:flex-row items-center justify-between gap-8 relative max-w-4xl mx-auto mt-12">
             {/* Node 1 */}
-            <div className="bg-[#141615] border border-white/10 p-6 rounded-2xl w-full md:w-1/3 relative z-10 flex flex-col items-center text-center shadow-lg">
+            <motion.div 
+              initial={{ borderColor: "rgba(255,255,255,0.05)", boxShadow: "0 0 0px rgba(189,205,214,0)" }}
+              whileInView={{ borderColor: "rgba(189,205,214,0.3)", boxShadow: "0 0 20px rgba(189,205,214,0.05)" }}
+              transition={{ repeat: Infinity, duration: 2, repeatType: "reverse", ease: "easeInOut", delay: 0 }}
+              className="bg-[#141615] border-2 p-6 rounded-2xl w-full md:w-1/3 relative z-10 flex flex-col items-center text-center"
+            >
               <div className="bg-[#0A0B0A] p-3 rounded-xl border border-white/10 text-white mb-4">
                 <HugeiconsIcon icon={Mail01Icon} strokeWidth={2} className="size-6" />
               </div>
               <h3 className="text-white font-bold mb-2">1. Ingestion</h3>
               <p className="text-[#929E96] text-xs">Reads incoming client emails to detect intent and request.</p>
-            </div>
+            </motion.div>
 
             {/* Connector 1 */}
-            <div className="hidden md:block absolute left-[16.66%] right-[50%] top-1/2 -translate-y-1/2 h-[2px] bg-[linear-gradient(to_right,rgba(255,255,255,0.2)_50%,transparent_50%)] bg-[length:12px_100%] animate-pulse"></div>
+            <div className="hidden md:block absolute left-[16.66%] right-[50%] top-1/2 -translate-y-1/2 h-[2px] bg-white/5 overflow-hidden">
+              <motion.div 
+                initial={{ x: "-100%" }}
+                animate={{ x: "300%" }}
+                transition={{ repeat: Infinity, duration: 2, ease: "linear" }}
+                className="h-full w-1/2 bg-gradient-to-r from-transparent via-[#BDCDD6] to-transparent opacity-80"
+              />
+            </div>
 
             {/* Node 2 */}
-            <div className="bg-[#141615] border border-white/10 p-6 rounded-2xl w-full md:w-1/3 relative z-10 flex flex-col items-center text-center shadow-lg">
+            <motion.div 
+              initial={{ borderColor: "rgba(255,255,255,0.05)", boxShadow: "0 0 0px rgba(189,205,214,0)" }}
+              whileInView={{ borderColor: "rgba(189,205,214,0.5)", boxShadow: "0 0 25px rgba(189,205,214,0.1)" }}
+              transition={{ repeat: Infinity, duration: 2, repeatType: "reverse", ease: "easeInOut", delay: 0.6 }}
+              className="bg-[#141615] border-2 p-6 rounded-2xl w-full md:w-1/3 relative z-10 flex flex-col items-center text-center"
+            >
               <div className="bg-[#0A0B0A] p-3 rounded-xl border border-white/10 text-white mb-4">
                 <HugeiconsIcon icon={ZapIcon} strokeWidth={2} className="size-6" />
               </div>
               <h3 className="text-white font-bold mb-2">2. AI Processing</h3>
               <p className="text-[#929E96] text-xs">Checks available calendar slots and extracts internal context.</p>
-            </div>
+            </motion.div>
 
             {/* Connector 2 */}
-            <div className="hidden md:block absolute left-[50%] right-[16.66%] top-1/2 -translate-y-1/2 h-[2px] bg-[linear-gradient(to_right,rgba(189,205,214,0.4)_50%,transparent_50%)] bg-[length:12px_100%] animate-pulse"></div>
+            <div className="hidden md:block absolute left-[50%] right-[16.66%] top-1/2 -translate-y-1/2 h-[2px] bg-white/5 overflow-hidden">
+              <motion.div 
+                initial={{ x: "-100%" }}
+                animate={{ x: "300%" }}
+                transition={{ repeat: Infinity, duration: 2, ease: "linear", delay: 1 }}
+                className="h-full w-1/2 bg-gradient-to-r from-transparent via-[#BDCDD6] to-transparent opacity-80"
+              />
+            </div>
 
             {/* Node 3 (Highlight) */}
-            <div className="bg-[#141615] border border-[#BDCDD6] p-6 rounded-2xl w-full md:w-1/3 relative z-10 flex flex-col items-center text-center shadow-[0_0_30px_rgba(189,205,214,0.2)]">
-              <div className="absolute -top-3 bg-[#BDCDD6] text-[#0A0B0A] px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest whitespace-nowrap shadow-md">
+            <motion.div 
+              initial={{ borderColor: "rgba(189,205,214,0.3)", boxShadow: "0 0 10px rgba(189,205,214,0.1)" }}
+              whileInView={{ borderColor: "rgba(189,205,214,1)", boxShadow: "0 0 40px rgba(189,205,214,0.3)" }}
+              transition={{ repeat: Infinity, duration: 2, repeatType: "reverse", ease: "easeInOut", delay: 1.2 }}
+              className="bg-[#141615] border-2 p-6 rounded-2xl w-full md:w-1/3 relative z-10 flex flex-col items-center text-center"
+            >
+              <div className="absolute -top-3 bg-[#BDCDD6] text-[#0A0B0A] px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest whitespace-nowrap shadow-[0_0_15px_rgba(189,205,214,0.5)]">
                 Waiting for Approval
               </div>
               <div className="bg-[#BDCDD6]/10 p-3 rounded-xl border border-[#BDCDD6]/20 text-[#BDCDD6] mb-4 mt-2">
@@ -349,7 +378,7 @@ export default function LandingPage() {
               </div>
               <h3 className="text-white font-bold mb-2">3. Staging / Approval</h3>
               <p className="text-[#929E96] text-xs">Creates draft responses without auto-sending. You review and click send.</p>
-            </div>
+            </motion.div>
           </div>
         </motion.section>
 
