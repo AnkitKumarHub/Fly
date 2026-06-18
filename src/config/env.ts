@@ -21,4 +21,10 @@ export const env = {
     process.env.GOOGLE_CALLBACK_URL ?? "http://localhost:8000/auth/google/callback",
   corsairKek: process.env.CORSAIR_KEK!,
   gmailPubsubTopic: process.env.GMAIL_PUBSUB_TOPIC,
+
+  // AI agent
+  openaiApiKey: process.env.OPENAI_API_KEY!,
+  openaiModel: process.env.OPENAI_MODEL ?? "gpt-4o-mini",
+  agentMaxSteps: parseInt(process.env.AGENT_MAX_STEPS ?? "5", 10),
 };
+

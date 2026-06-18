@@ -10,6 +10,8 @@ import { integrationsRouter } from "./modules/integrations/route.js";
 import { notificationsRouter } from "./notifications/route.js";
 import { authenticationMiddleware } from "./middleware/auth-middleware.js";
 import { webhooksRouter } from "./webhooks/route.js";
+import { agentRouter } from "./modules/agent/route.js";
+import { adminRouter } from "./modules/admin/route.js";
 
 
 export function createApplication(): Express {
@@ -37,6 +39,8 @@ export function createApplication(): Express {
   app.use("/events", eventsRouter);
   app.use("/notifications", notificationsRouter);
   app.use("/webhooks", webhooksRouter);
+  app.use("/agent", agentRouter);
+  app.use("/admin", adminRouter);
 
   return app;
 }

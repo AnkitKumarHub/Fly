@@ -12,6 +12,14 @@ export const usersTable = pgTable("users", {
 
   password: text("password"),
 
+  // Role-based access: 'user' | 'admin' — promote via: UPDATE users SET role='admin' WHERE email='...'
+  role: varchar("role", { length: 16 }).notNull().default("user"),
+
+  // AI suspension — set via admin API or direct DB UPDATE
+  isSuspended: boolean("is_suspended").notNull().default(false),
+  suspendedAt: timestamp("suspended_at"),
+  suspendedReason: text("suspended_reason"),
+
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at")
     .$onUpdate(() => new Date())

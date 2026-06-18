@@ -4,6 +4,9 @@ import { env } from "../../../config/env.js";
 
 export interface UserTokenPayload {
   id: string;
+  firstName: string;
+  role: "user" | "admin";
+  isSuspended: boolean;
 }
 
 const ACCESS_TOKEN_TTL = "15m";
@@ -23,5 +26,10 @@ export function verifyAccessToken(token: string): UserTokenPayload {
     throw new Error("Invalid token type");
   }
 
-  return { id: decoded.id };
+  return {
+    id: decoded.id,
+    firstName: decoded.firstName ?? "",
+    role: decoded.role ?? "user",
+    isSuspended: decoded.isSuspended ?? false,
+  };
 }

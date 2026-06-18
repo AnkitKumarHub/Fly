@@ -24,9 +24,11 @@
   },
   "type": "module",
   "dependencies": {
+    "@ai-sdk/openai": "^3.0.72",
     "@corsair-dev/cli": "^0.1.19",
     "@corsair-dev/gmail": "^0.1.4",
     "@corsair-dev/googlecalendar": "^0.1.4",
+    "ai": "^6.0.207",
     "bcrypt": "^6.0.0",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.6",

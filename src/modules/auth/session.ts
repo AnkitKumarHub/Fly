@@ -3,7 +3,7 @@ import { and, eq, gt } from "drizzle-orm";
 
 import { ApiError } from "../../common/utils/api-error.js";
 import { db } from "../../db/index.js";
-import { refreshTokensTable } from "../../db/auth-schema.js";
+import { refreshTokensTable, usersTable } from "../../db/auth-schema.js";
 import { createAccessToken } from "./utils/token.js";
 
 const REFRESH_TOKEN_TTL_MS = 7 * 24 * 60 * 60 * 1000;
@@ -21,8 +21,23 @@ function createOpaqueRefreshToken(): string {
   return randomBytes(32).toString("hex");
 }
 
-function buildAuthSession(userId: string) {
-  const accessToken = createAccessToken({ id: userId });
+async function buildAuthSession(userId: string) {
+  // Fetch role, suspension status, and firstName for the JWT payload
+  const [user] = await db
+    .select({
+      firstName: usersTable.firstName,
+      role: usersTable.role,
+      isSuspended: usersTable.isSuspended,
+    })
+    .from(usersTable)
+    .where(eq(usersTable.id, userId));
+
+  const accessToken = createAccessToken({
+    id: userId,
+    firstName: user?.firstName ?? "",
+    role: (user?.role ?? "user") as "user" | "admin",
+    isSuspended: user?.isSuspended ?? false,
+  });
   const refreshToken = createOpaqueRefreshToken();
   const expiresAt = new Date(Date.now() + REFRESH_TOKEN_TTL_MS);
 
@@ -34,7 +49,7 @@ function buildAuthSession(userId: string) {
 }
 
 export async function issueAuthSession(userId: string): Promise<AuthSession> {
-  const session = buildAuthSession(userId);
+  const session = await buildAuthSession(userId);
 
   await db.insert(refreshTokensTable).values({
     userId,
@@ -66,7 +81,7 @@ export async function refreshAuthSession(refreshToken: string): Promise<AuthSess
       );
     }
 
-    const nextSession = buildAuthSession(revokedToken.userId);
+    const nextSession = await buildAuthSession(revokedToken.userId);
 
     await tx.insert(refreshTokensTable).values({
       userId: revokedToken.userId,

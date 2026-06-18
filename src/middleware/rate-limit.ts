@@ -41,45 +41,73 @@ function pruneExpiredBuckets(now: number) {
   }
 }
 
+function applyRateLimit(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+  options: RateLimitOptions,
+  bucketKey: string,
+): void {
+  const now = Date.now();
+
+  pruneExpiredBuckets(now);
+
+  const existingBucket = rateLimitBuckets.get(bucketKey);
+  if (!existingBucket || existingBucket.resetAt <= now) {
+    rateLimitBuckets.set(bucketKey, {
+      count: 1,
+      resetAt: now + options.windowMs,
+    });
+    next();
+    return;
+  }
+
+  if (existingBucket.count >= options.max) {
+    const retryAfterSeconds = Math.max(
+      1,
+      Math.ceil((existingBucket.resetAt - now) / 1000),
+    );
+
+    res.setHeader("Retry-After", retryAfterSeconds.toString());
+    console.warn("rate_limit_exceeded", {
+      key: bucketKey,
+      max: options.max,
+      namespace: options.namespace,
+      path: req.originalUrl,
+    });
+    sendErrorResponse(
+      res,
+      ApiError.tooManyRequests("Too many requests", "rate_limit_exceeded"),
+    );
+    return;
+  }
+
+  existingBucket.count += 1;
+  next();
+}
+
+/** IP-based rate limiter — for public/unauthenticated routes */
 export function createRateLimitMiddleware(options: RateLimitOptions) {
   return (req: Request, res: Response, next: NextFunction): void => {
-    const now = Date.now();
     const clientIp = getClientIp(req);
     const key = `${options.namespace}:${clientIp}`;
-
-    pruneExpiredBuckets(now);
-
-    const existingBucket = rateLimitBuckets.get(key);
-    if (!existingBucket || existingBucket.resetAt <= now) {
-      rateLimitBuckets.set(key, {
-        count: 1,
-        resetAt: now + options.windowMs,
-      });
-      next();
-      return;
-    }
-
-    if (existingBucket.count >= options.max) {
-      const retryAfterSeconds = Math.max(
-        1,
-        Math.ceil((existingBucket.resetAt - now) / 1000),
-      );
-
-      res.setHeader("Retry-After", retryAfterSeconds.toString());
-      console.warn("auth.rate_limit_exceeded", {
-        ip: clientIp,
-        max: options.max,
-        namespace: options.namespace,
-        path: req.originalUrl,
-      });
-      sendErrorResponse(
-        res,
-        ApiError.tooManyRequests("Too many requests", "rate_limit_exceeded"),
-      );
-      return;
-    }
-
-    existingBucket.count += 1;
-    next();
+    applyRateLimit(req, res, next, options, key);
   };
 }
+
+/** User-ID-based rate limiter — for authenticated routes (AI agent).
+ *  Keying on userId means rotating IPs don't bypass limits, and shared
+ *  NAT users each get their own independent bucket. */
+export function createUserRateLimitMiddleware(options: RateLimitOptions) {
+  return (req: Request, res: Response, next: NextFunction): void => {
+    const userId = req.user?.id;
+    if (!userId) {
+      // No user means auth middleware should have blocked — fail safe
+      sendErrorResponse(res, ApiError.unauthorized("Authentication required", "authentication_required"));
+      return;
+    }
+    const key = `${options.namespace}:${userId}`;
+    applyRateLimit(req, res, next, options, key);
+  };
+}
+
