@@ -2,6 +2,7 @@ import express, { type Router } from "express";
 import { generateOAuthUrl, processOAuthCallback } from "corsair/oauth";
 
 import { corsair } from "../../corsair.js";
+import { ensureCorsairTenant } from "../../bootstrap-corsair.js";
 import { env } from "../../config/env.js";
 import { restrictToAuthenticatedUser } from "../../middleware/auth-middleware.js";
 import { handleDisconnect, handleGetStatus } from "./controller.js";
@@ -32,6 +33,8 @@ integrationsRouter.get("/connect", restrictToAuthenticatedUser(), async (req, re
   }
 
   try {
+    await ensureCorsairTenant(req.user!.id);
+
     const { url, state } = await generateOAuthUrl(corsair, plugin, {
       tenantId: req.user!.id,
       redirectUri: REDIRECT_URI,
@@ -87,6 +90,9 @@ integrationsRouter.get("/callback", async (req, res) => {
     return res.redirect(`${env.frontendUrl}/dashboard/integrations?connected=${plugin}`);
   } catch (error) {
     res.clearCookie("oauth_state");
-    return res.status(500).json({ success: false, message: "OAuth callback failed" });
+    console.error("integrations.callback.failed:", error);
+    const message =
+      error instanceof Error ? error.message : "OAuth callback failed";
+    return res.status(500).json({ success: false, message });
   }
 });

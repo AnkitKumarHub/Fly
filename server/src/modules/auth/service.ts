@@ -1,6 +1,5 @@
 import { eq } from "drizzle-orm";
-import { setupCorsair } from "corsair";
-import { corsair } from "../../corsair.js";
+import { ensureCorsairTenant } from "../../bootstrap-corsair.js";
 import { ApiError } from "../../common/utils/api-error.js";
 import { db } from "../../db/index.js";
 import { usersTable } from "../../db/auth-schema.js";
@@ -36,7 +35,7 @@ export async function signUp(input: SignUpInput): Promise<{ userId: string }> {
       throw new Error("User creation failed.");
     }
 
-    await setupCorsair(corsair, { tenantId: createdUser.id });
+    await ensureCorsairTenant(createdUser.id);
 
     return { userId: createdUser.id };
   } catch (error) {
@@ -81,6 +80,7 @@ export async function googleSignIn(input: GoogleSignInInput) {
     .where(eq(usersTable.googleId, input.googleId));
 
   if (userByGoogleId) {
+    await ensureCorsairTenant(userByGoogleId.id);
     return issueAuthSession(userByGoogleId.id);
   }
 
@@ -103,6 +103,7 @@ export async function googleSignIn(input: GoogleSignInInput) {
       throw new Error("Failed to link Google account.");
     }
 
+    await ensureCorsairTenant(linkedUser.id);
     return issueAuthSession(linkedUser.id);
   }
 
@@ -122,7 +123,7 @@ export async function googleSignIn(input: GoogleSignInInput) {
       throw new Error("User creation failed.");
     }
 
-    await setupCorsair(corsair, { tenantId: createdUser.id });
+    await ensureCorsairTenant(createdUser.id);
 
     return issueAuthSession(createdUser.id);
   } catch (error) {
