@@ -3,6 +3,7 @@ import express, { type Router } from "express";
 import { createRateLimitMiddleware } from "../../middleware/rate-limit.js";
 import {
   handleGoogleCallback,
+  handleGoogleExchange,
   handleGoogleRedirect,
   handleMe,
   handleRefresh,
@@ -17,6 +18,7 @@ export const authRouter: Router = express.Router();
 authRouter.post("/sign-up", handleSignUp);
 authRouter.post("/sign-in", handleSignIn);
 authRouter.get("/google", handleGoogleRedirect);
+authRouter.post("/google/exchange", handleGoogleExchange);
 authRouter.get("/google/callback", handleGoogleCallback);
 authRouter.post(
   "/refresh",

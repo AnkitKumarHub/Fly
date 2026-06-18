@@ -1,5 +1,7 @@
 import { cookies } from "next/headers"
 
+import { getApiBaseUrl } from "@/lib/backend-url"
+
 export interface CurrentUser {
   firstName: string
   lastName: string | null
@@ -19,7 +21,7 @@ export async function getCurrentUser(): Promise<CurrentUser | null> {
   if (!cookieHeader) return null
 
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/me`, {
+    const res = await fetch(`${getApiBaseUrl()}/auth/me`, {
       headers: { Cookie: cookieHeader },
       cache: "no-store",
     })

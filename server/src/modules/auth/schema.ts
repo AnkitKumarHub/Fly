@@ -43,5 +43,10 @@ export const signInPayloadSchema = z.object({
   password: passwordSchema,
 });
 
+export const googleExchangePayloadSchema = z.object({
+  code: z.string().min(1, "Authorization code is required"),
+});
+
 export type SignUpInput = z.infer<typeof signupPayloadSchema>;
 export type SignInInput = z.infer<typeof signInPayloadSchema>;
+export type GoogleExchangeInput = z.infer<typeof googleExchangePayloadSchema>;

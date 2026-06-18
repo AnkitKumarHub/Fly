@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"
 import { isAxiosError } from "axios"
 
 import { api } from "@/lib/api"
+import { getApiBaseUrl } from "@/lib/backend-url"
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -126,7 +127,7 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
                   variant="outline"
                   type="button"
                   onClick={() => {
-                    window.location.href = `${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/google`
+                    window.location.href = `${getApiBaseUrl()}/auth/google`
                   }}
                 >
                   Sign up with Google

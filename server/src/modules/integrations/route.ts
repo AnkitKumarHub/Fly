@@ -10,7 +10,7 @@ import { renewWatchIfNeeded } from "./watches.js";
 
 export const integrationsRouter: Router = express.Router();
 
-const REDIRECT_URI = `${env.appUrl}/integrations/callback`;
+const REDIRECT_URI = `${env.frontendUrl}/api/integrations/callback`;
 
 integrationsRouter.get("/status", restrictToAuthenticatedUser(), handleGetStatus);
 

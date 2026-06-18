@@ -3,6 +3,7 @@
 import { useCallback, useRef, useState } from "react"
 import { api } from "@/lib/api"
 import { AGENT_UI } from "@/lib/agent-config"
+import { getApiBaseUrl } from "@/lib/backend-url"
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -150,7 +151,7 @@ export function useAgentChat() {
 
       try {
         // Use native fetch for streaming — axios doesn't support ReadableStream well
-        const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL ?? ""
+        const backendUrl = getApiBaseUrl()
         abortControllerRef.current = new AbortController()
 
         const res = await fetch(`${backendUrl}${AGENT_UI.CHAT_ENDPOINT}`, {

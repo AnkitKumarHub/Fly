@@ -5,6 +5,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { useRouter, useSearchParams } from "next/navigation"
 
 import { api } from "@/lib/api"
+import { getApiBaseUrl } from "@/lib/backend-url"
 
 interface IntegrationStatus {
   gmail: boolean
@@ -55,7 +56,7 @@ export function useIntegrations() {
   }, [searchParams, router, queryClient])
 
   const connectPlugin = useCallback((plugin: string) => {
-    window.location.href = `${process.env.NEXT_PUBLIC_BACKEND_URL}/integrations/connect?plugin=${plugin}`
+    window.location.href = `${getApiBaseUrl()}/integrations/connect?plugin=${plugin}`
   }, [])
 
   const disconnectPlugin = useCallback(

@@ -6,6 +6,7 @@ import { isAxiosError } from "axios"
 
 import { cn } from "@/lib/utils"
 import { api } from "@/lib/api"
+import { getApiBaseUrl } from "@/lib/backend-url"
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -103,7 +104,7 @@ export function LoginForm({
                   variant="outline"
                   type="button"
                   onClick={() => {
-                    window.location.href = `${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/google`
+                    window.location.href = `${getApiBaseUrl()}/auth/google`
                   }}
                 >
                   Login with Google

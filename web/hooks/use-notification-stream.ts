@@ -3,7 +3,9 @@
 import { useEffect } from "react"
 import { useQueryClient } from "@tanstack/react-query"
 
-const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL ?? "http://localhost:8000"
+import { getApiBaseUrl } from "@/lib/backend-url"
+
+const backendUrl = getApiBaseUrl()
 
 export function useNotificationStream() {
   const queryClient = useQueryClient()

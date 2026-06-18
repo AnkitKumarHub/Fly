@@ -1,6 +1,8 @@
 import axios, { isAxiosError, type InternalAxiosRequestConfig } from "axios"
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL
+import { getApiBaseUrl } from "@/lib/backend-url"
+
+const API_BASE_URL = getApiBaseUrl()
 const AUTH_REFRESH_EVENT = "auth:session-expired"
 const AUTH_EXCLUDED_PATHS = new Set(["/auth/refresh", "/auth/sign-in", "/auth/sign-out"])
 const AUTH_REDIRECT_PATHS = ["/login", "/signup"]
@@ -15,9 +17,10 @@ let authRedirectInFlight = false
 
 function getRequestPath(url?: string) {
   if (!url) return ""
+  if (url.startsWith("/")) return url.split("?")[0]
 
   try {
-    return new URL(url, API_BASE_URL).pathname
+    return new URL(url).pathname
   } catch {
     return url
   }

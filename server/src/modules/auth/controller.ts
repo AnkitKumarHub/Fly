@@ -9,7 +9,11 @@ import {
   setAuthCookies,
 } from "./utils/cookies.js";
 import { getGoogleAuthUrl, getGoogleProfileFromCode } from "./google.js";
-import { signInPayloadSchema, signupPayloadSchema } from "./schema.js";
+import {
+  googleExchangePayloadSchema,
+  signInPayloadSchema,
+  signupPayloadSchema,
+} from "./schema.js";
 import { getAuthenticatedUser, googleSignIn, signIn, signUp } from "./service.js";
 import {
   refreshAuthSession,
@@ -76,6 +80,29 @@ export async function handleSignIn(req: Request, res: Response) {
 
 export function handleGoogleRedirect(_req: Request, res: Response) {
   return res.redirect(getGoogleAuthUrl());
+}
+
+/** Returns tokens in JSON for the frontend BFF to set same-origin cookies. */
+export async function handleGoogleExchange(req: Request, res: Response) {
+  const validationResult = googleExchangePayloadSchema.safeParse(req.body);
+
+  if (!validationResult.success) {
+    return sendErrorResponse(res, ApiError.badRequest("Body validation failed"), {
+      error: validationResult.error.issues,
+    });
+  }
+
+  try {
+    const profile = await getGoogleProfileFromCode(validationResult.data.code);
+    const { accessToken, refreshToken } = await googleSignIn(profile);
+
+    return ApiResponse.ok(res, "Google sign-in successful", {
+      accessToken,
+      refreshToken,
+    });
+  } catch (error) {
+    return handleError(res, error);
+  }
 }
 
 export async function handleGoogleCallback(req: Request, res: Response) {
