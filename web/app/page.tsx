@@ -560,7 +560,7 @@ export default function LandingPage() {
                   Choose Pro +
                 </motion.button>
               </motion.div>
-            </div>
+            </motion.div>
           </motion.div>
         </section>
 
