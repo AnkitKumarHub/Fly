@@ -1,13 +1,13 @@
 import { tool } from "ai";
 import { z } from "zod";
-import { searchEmails, listEmails } from "../emails/service.js";
-import { listEvents, searchEvents } from "../events/service.js";
+import { searchEmails, listEmails, sendEmail } from "../emails/service.js";
+import { listEvents, searchEvents, createEvent, updateEvent } from "../events/service.js";
 
 /** All tools are closed over tenantId — the LLM CANNOT specify a different tenant.
  *  Read tools call Corsair DB directly (fast, no API rate limits).
- *  Write tools use the propose pattern — they return a preview for UI confirmation.
- *  The actual write (POST /emails/send, POST /events) is done by the frontend
- *  after the user clicks "Confirm". */
+ *  Write tools execute REAL actions (send email, create event, update event).
+ *  The system prompt instructs the LLM to ALWAYS confirm with the user in chat
+ *  before calling any write tool. The conversation history provides the memory. */
 export function buildTools(tenantId: string) {
   // ── READ TOOLS ────────────────────────────────────────────────────────────
 
@@ -82,28 +82,34 @@ export function buildTools(tenantId: string) {
     },
   });
 
-  // ── PROPOSE / WRITE TOOLS ─────────────────────────────────────────────────
-  // These NEVER directly write. They return a preview for UI confirmation.
-  // The actual write is done by the frontend calling existing REST routes.
+  // ── WRITE TOOLS ───────────────────────────────────────────────────────────
+  // These ACTUALLY execute the action. The system prompt mandates the LLM
+  // must confirm with the user in chat BEFORE calling any of these.
 
-  const propose_send_email = tool({
+  const send_email = tool({
     description:
-      "PROPOSE sending an email. IMPORTANT: Always summarise what you will send first, then call this tool. It returns a preview for user confirmation — it does NOT send the email.",
+      "Send an email on behalf of the user. CRITICAL: You MUST first describe the full email (to, subject, body) in the chat and ask the user to confirm with something like 'Shall I send this?'. Only call this tool AFTER the user has explicitly said yes/confirmed.",
     inputSchema: z.object({
       to: z.string().email().describe("Recipient email address"),
       subject: z.string().max(500),
-      body: z.string().max(5000),
+      body: z.string().max(5000).describe("Email body text"),
     }),
-    execute: async ({ to, subject, body }) => ({
-      confirmationRequired: true,
-      type: "send_email" as const,
-      preview: { to, subject, bodyPreview: body.slice(0, 300), bodyFull: body },
-    }),
+    execute: async ({ to, subject, body }) => {
+      try {
+        await sendEmail(tenantId, { to, subject, body });
+        return { success: true, message: `Email sent to ${to} with subject "${subject}"` };
+      } catch (error) {
+        return {
+          success: false,
+          message: `Failed to send email: ${error instanceof Error ? error.message : "Unknown error"}`,
+        };
+      }
+    },
   });
 
-  const propose_create_event = tool({
+  const create_event = tool({
     description:
-      "PROPOSE creating a calendar event. IMPORTANT: Summarise the event details and get user confirmation BEFORE calling this. Returns a preview — does NOT create the event.",
+      "Create a Google Calendar event. CRITICAL: You MUST first describe the full event details (title, date/time, attendees) in the chat and ask the user to confirm. Only call this tool AFTER the user has explicitly confirmed.",
     inputSchema: z.object({
       title: z.string().max(200),
       startDateTime: z.string().describe("ISO 8601 datetime e.g. 2026-06-20T09:00:00+05:30"),
@@ -111,16 +117,30 @@ export function buildTools(tenantId: string) {
       attendees: z.array(z.string().email()).max(10).optional(),
       description: z.string().max(1000).optional(),
     }),
-    execute: async ({ title, startDateTime, endDateTime, attendees, description }) => ({
-      confirmationRequired: true,
-      type: "create_event" as const,
-      preview: { title, startDateTime, endDateTime, attendees: attendees ?? [], description },
-    }),
+    execute: async ({ title, startDateTime, endDateTime, attendees, description }) => {
+      try {
+        const result = await createEvent(tenantId, {
+          event: {
+            summary: title,
+            start: { dateTime: startDateTime },
+            end: { dateTime: endDateTime },
+            attendees: attendees?.map((email) => ({ email })),
+            description,
+          },
+        });
+        return { success: true, message: `Event "${title}" created successfully`, eventId: result.id };
+      } catch (error) {
+        return {
+          success: false,
+          message: `Failed to create event: ${error instanceof Error ? error.message : "Unknown error"}`,
+        };
+      }
+    },
   });
 
-  const propose_update_event = tool({
+  const update_event = tool({
     description:
-      "PROPOSE updating an existing calendar event. Returns a preview for user confirmation — does NOT update immediately.",
+      "Update an existing Google Calendar event. CRITICAL: Describe the changes first and get user confirmation before calling this tool.",
     inputSchema: z.object({
       eventId: z.string().describe("Google Calendar event ID from list_events or search_events"),
       title: z.string().max(200).optional(),
@@ -128,11 +148,25 @@ export function buildTools(tenantId: string) {
       endDateTime: z.string().optional(),
       description: z.string().max(1000).optional(),
     }),
-    execute: async ({ eventId, title, startDateTime, endDateTime, description }) => ({
-      confirmationRequired: true,
-      type: "update_event" as const,
-      preview: { eventId, title, startDateTime, endDateTime, description },
-    }),
+    execute: async ({ eventId, title, startDateTime, endDateTime, description }) => {
+      try {
+        const eventUpdate: Record<string, unknown> = {};
+        if (title) eventUpdate.summary = title;
+        if (startDateTime) eventUpdate.start = { dateTime: startDateTime };
+        if (endDateTime) eventUpdate.end = { dateTime: endDateTime };
+        if (description) eventUpdate.description = description;
+
+        const result = await updateEvent(tenantId, eventId, {
+          event: eventUpdate as Parameters<typeof updateEvent>[2]["event"],
+        });
+        return { success: true, message: `Event updated successfully`, eventId: result.id };
+      } catch (error) {
+        return {
+          success: false,
+          message: `Failed to update event: ${error instanceof Error ? error.message : "Unknown error"}`,
+        };
+      }
+    },
   });
 
   return {
@@ -140,8 +174,8 @@ export function buildTools(tenantId: string) {
     list_emails,
     list_events,
     search_events,
-    propose_send_email,
-    propose_create_event,
-    propose_update_event,
+    send_email,
+    create_event,
+    update_event,
   };
 }

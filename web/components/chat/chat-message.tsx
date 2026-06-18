@@ -1,17 +1,13 @@
 "use client"
 
 import { cn } from "@/lib/utils"
-import { ChatToolCard } from "./chat-tool-card"
-import { ChatConfirmCard } from "./chat-confirm-card"
 import { ChatTyping } from "./chat-typing"
-import type { ChatMessage, ToolCallPreview } from "@/hooks/use-agent-chat"
+import type { ChatMessage } from "@/hooks/use-agent-chat"
 
 interface ChatMessageProps {
   message: ChatMessage
   isLastAssistant?: boolean
   isStreaming?: boolean
-  onConfirm: (messageId: string, proposal: ToolCallPreview) => Promise<void>
-  onCancel: (messageId: string) => void
 }
 
 function formatTime(date: Date) {
@@ -22,8 +18,6 @@ export function ChatMessageBubble({
   message,
   isLastAssistant,
   isStreaming,
-  onConfirm,
-  onCancel,
 }: ChatMessageProps) {
   const isUser = message.role === "user"
   const isEmpty = !message.content.trim()
@@ -59,22 +53,6 @@ export function ChatMessageBubble({
             <span className="whitespace-pre-wrap break-words">{message.content}</span>
           )}
         </div>
-
-        {/* Tool result cards — shown below AI bubble */}
-        {!isUser && message.toolResults?.map((result, i) => (
-          <ChatToolCard key={i} toolName={result.toolName} data={result.data} />
-        ))}
-
-        {/* Proposal confirmation card */}
-        {!isUser && message.proposal && (
-          <ChatConfirmCard
-            messageId={message.id}
-            proposal={message.proposal}
-            state={message.proposalState}
-            onConfirm={onConfirm}
-            onCancel={onCancel}
-          />
-        )}
 
         {/* Timestamp */}
         <span className="text-[10px] text-muted-foreground/50 px-1">

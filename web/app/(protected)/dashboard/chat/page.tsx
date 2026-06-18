@@ -15,8 +15,6 @@ export default function ChatPage() {
     isStreaming,
     error,
     send,
-    confirmAction,
-    rejectAction,
     clearChat,
   } = useAgentChat()
 
@@ -67,8 +65,6 @@ export default function ChatPage() {
           <ChatMessageList
             messages={messages}
             isStreaming={isStreaming}
-            onConfirm={confirmAction}
-            onCancel={rejectAction}
           />
         )}
 

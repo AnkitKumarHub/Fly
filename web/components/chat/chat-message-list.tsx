@@ -2,20 +2,16 @@
 
 import { useEffect, useRef } from "react"
 import { ChatMessageBubble } from "./chat-message"
-import type { ChatMessage, ToolCallPreview } from "@/hooks/use-agent-chat"
+import type { ChatMessage } from "@/hooks/use-agent-chat"
 
 interface ChatMessageListProps {
   messages: ChatMessage[]
   isStreaming: boolean
-  onConfirm: (messageId: string, proposal: ToolCallPreview) => Promise<void>
-  onCancel: (messageId: string) => void
 }
 
 export function ChatMessageList({
   messages,
   isStreaming,
-  onConfirm,
-  onCancel,
 }: ChatMessageListProps) {
   const bottomRef = useRef<HTMLDivElement>(null)
 
@@ -36,8 +32,6 @@ export function ChatMessageList({
             message={msg}
             isLastAssistant={isLastAssistant}
             isStreaming={isStreaming}
-            onConfirm={onConfirm}
-            onCancel={onCancel}
           />
         )
       })}
