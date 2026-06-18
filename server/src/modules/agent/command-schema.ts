@@ -81,6 +81,22 @@ export const unsupportedCommandSchema = z.object({
   message: optionalShortTextSchema,
 });
 
+/** OpenAI-compatible intent classifier (no oneOf). Used before per-intent parsing. */
+export const intentClassificationSchema = z.object({
+  intent: z.enum([
+    "search_emails",
+    "draft_email",
+    "send_email",
+    "create_event",
+    "create_event_and_send_email",
+    "unsupported",
+  ]),
+  reason: z.enum(["unsupported_scope", "unclear_intent", "unsafe_request"]).optional(),
+  message: optionalShortTextSchema,
+});
+
+export type IntentClassification = z.infer<typeof intentClassificationSchema>;
+
 export const parsedCommandSchema = z.discriminatedUnion("intent", [
   searchEmailsCommandSchema,
   draftEmailCommandSchema,

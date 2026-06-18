@@ -2,6 +2,7 @@
 
 import { useCallback, useRef, useState } from "react"
 import { AGENT_UI } from "@/lib/agent-config"
+import { getApiBaseUrl } from "@/lib/backend-url"
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -74,7 +75,7 @@ export function useAgentChat() {
         .slice(-20) // backend cap
 
       try {
-        const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL ?? ""
+        const backendUrl = getApiBaseUrl()
         abortControllerRef.current = new AbortController()
 
         const res = await fetch(`${backendUrl}${AGENT_UI.CHAT_ENDPOINT}`, {

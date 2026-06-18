@@ -11,6 +11,7 @@ import {
   type ConfirmCommandResponse,
   type ConfirmationPayload,
   type ContinuationPayload,
+  type IntentClassification,
   type MissingField,
   type ParsedCommand,
   type ResolveCommandInput,
@@ -20,7 +21,7 @@ import {
   createEventAndSendEmailCommandSchema,
   createEventCommandSchema,
   draftEmailCommandSchema,
-  parsedCommandSchema,
+  intentClassificationSchema,
   resolvedCombinedCommandSchema,
   resolvedEmailCommandSchema,
   resolvedEventCommandSchema,
@@ -182,15 +183,31 @@ function buildBlockedResponse(
   };
 }
 
+function buildClassifyPrompt(input: {
+  clientContext: ResolveCommandInput["clientContext"];
+  commandText: string;
+}): string {
+  return [
+    "Classify the user command into exactly one intent.",
+    "Supported intents: search_emails, draft_email, send_email, create_event, create_event_and_send_email.",
+    "Use intent=unsupported for open-ended chat, unclear requests, unsafe requests, or anything outside one-shot Gmail or Calendar actions.",
+    "If unsupported, set reason to unsupported_scope, unclear_intent, or unsafe_request.",
+    "",
+    `Current date/time: ${input.clientContext.now}`,
+    `Current timezone: ${input.clientContext.timeZone}`,
+    "",
+    `User message: ${input.commandText}`,
+  ].join("\n");
+}
+
 function buildResolvePrompt(input: {
   clientContext: ResolveCommandInput["clientContext"];
   commandText: string;
   continuation: ContinuationPayload | undefined;
+  lockedIntent?: CommandIntent;
 }): string {
   const baseRules = [
     "You translate a keyboard command into one supported action object.",
-    "Supported actions only: search_emails, draft_email, send_email, create_event, create_event_and_send_email.",
-    "If the message is open-ended, conversational, unsupported, or unsafe, return intent=unsupported.",
     "Never invent missing facts. Leave missing strings null and missing arrays empty.",
     "Resolve relative dates using the supplied current time and timezone, and output ISO 8601 datetimes.",
     "For email recipients or attendees, preserve the raw person reference if the user gave a name instead of an email.",
@@ -207,7 +224,13 @@ function buildResolvePrompt(input: {
         `Still missing: ${input.continuation.missingFields.map((field) => field.label).join(", ")}`,
         "Keep the same intent and fill only the missing pieces from the latest user message.",
       ].join("\n")
-    : "";
+    : input.lockedIntent
+      ? [
+          "",
+          `Locked intent: ${input.lockedIntent}`,
+          "Parse only the fields required for this intent.",
+        ].join("\n")
+      : "";
 
   return [
     ...baseRules,
@@ -433,19 +456,47 @@ function schemaForIntent(intent: CommandIntent) {
   }
 }
 
-async function parseCommand(
-  input: ResolveCommandInput,
-  continuation: ContinuationPayload | undefined,
-): Promise<{ command: ParsedCommand; usage: UsageSummary }> {
-  const schema = continuation ? schemaForIntent(continuation.command.intent) : parsedCommandSchema;
+function mergeUsage(first: UsageSummary, second: UsageSummary): UsageSummary {
+  return {
+    promptTokens: first.promptTokens + second.promptTokens,
+    completionTokens: first.completionTokens + second.completionTokens,
+    totalTokens: first.totalTokens + second.totalTokens,
+  };
+}
 
+async function classifyIntent(
+  input: ResolveCommandInput,
+): Promise<{ classification: IntentClassification; usage: UsageSummary }> {
+  const classified = await generateObject({
+    model: openai(env.openaiModel),
+    schema: intentClassificationSchema,
+    system: buildClassifyPrompt({
+      clientContext: input.clientContext,
+      commandText: input.input,
+    }),
+    prompt: input.input,
+    abortSignal: AbortSignal.timeout(AGENT_LIMITS.STREAM_TIMEOUT_MS),
+  });
+
+  return {
+    classification: classified.object,
+    usage: toUsageSummary(classified.usage),
+  };
+}
+
+async function parseCommandFields(
+  input: ResolveCommandInput,
+  intent: CommandIntent,
+  continuation: ContinuationPayload | undefined,
+): Promise<{ command: SupportedParsedCommand; usage: UsageSummary }> {
   const parsed = await generateObject({
     model: openai(env.openaiModel),
-    schema,
+    schema: schemaForIntent(intent),
     system: buildResolvePrompt({
       clientContext: input.clientContext,
       commandText: input.input,
       continuation,
+      ...(continuation ? {} : { lockedIntent: intent }),
     }),
     prompt: input.input,
     abortSignal: AbortSignal.timeout(AGENT_LIMITS.STREAM_TIMEOUT_MS),
@@ -453,11 +504,49 @@ async function parseCommand(
 
   const command = continuation
     ? mergeParsedCommand(continuation.command, parsed.object as SupportedParsedCommand)
-    : (parsed.object as ParsedCommand);
+    : (parsed.object as SupportedParsedCommand);
 
   return {
     command,
     usage: toUsageSummary(parsed.usage),
+  };
+}
+
+async function parseCommand(
+  input: ResolveCommandInput,
+  continuation: ContinuationPayload | undefined,
+): Promise<{ command: ParsedCommand; usage: UsageSummary }> {
+  if (continuation) {
+    const { command, usage } = await parseCommandFields(
+      input,
+      continuation.command.intent,
+      continuation,
+    );
+    return { command, usage };
+  }
+
+  const { classification, usage: classifyUsage } = await classifyIntent(input);
+
+  if (classification.intent === "unsupported") {
+    return {
+      command: {
+        intent: "unsupported",
+        reason: classification.reason ?? "unsupported_scope",
+        message: classification.message,
+      },
+      usage: classifyUsage,
+    };
+  }
+
+  const { command, usage: parseUsage } = await parseCommandFields(
+    input,
+    classification.intent,
+    continuation,
+  );
+
+  return {
+    command,
+    usage: mergeUsage(classifyUsage, parseUsage),
   };
 }
 

@@ -152,3 +152,4 @@ test.ts
 
 readme.md
 docker-compose.yml
+/src/modules/agent/command-schema.openai.test.ts
