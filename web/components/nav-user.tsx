@@ -23,6 +23,8 @@ import {
 import { HugeiconsIcon } from "@hugeicons/react"
 import { MoreVerticalCircle01Icon, UserCircle02Icon, CreditCardIcon, Notification03Icon, Logout01Icon } from "@hugeicons/core-free-icons"
 
+import { useSignOut } from "@/hooks/use-sign-out"
+
 export function NavUser({
   user,
 }: {
@@ -33,6 +35,8 @@ export function NavUser({
   }
 }) {
   const { isMobile } = useSidebar()
+  const signOut = useSignOut()
+
   return (
     <SidebarMenu>
       <SidebarMenuItem>
@@ -92,9 +96,12 @@ export function NavUser({
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
+            <DropdownMenuItem
+              disabled={signOut.isPending}
+              onClick={() => signOut.mutate()}
+            >
               <HugeiconsIcon icon={Logout01Icon} strokeWidth={2} />
-              Log out
+              {signOut.isPending ? "Logging out..." : "Log out"}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
